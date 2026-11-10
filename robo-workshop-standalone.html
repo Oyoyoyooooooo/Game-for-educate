@@ -1,0 +1,1885 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Robo Workshop</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600&family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: workbench — mission/lesson tabs + code editor on the left, test chamber (grid world or test bench) + console on the right; stacks on phones */
+:root{
+  --bg:#ECE6D9; --panel:#FFFCF5; --panel2:#F5EFE2; --ink:#25221D; --muted:#655E52; --line:#D8CFBD; --edge:#B9AE98;
+  --accent:#C2410C; --accent-ink:#FFFFFF; --accent-soft:#FCE6D4; --accent-deep:#8F2F08;
+  --note:#FFF1B8; --note-ink:#3D3214; --grid:rgba(60,50,30,.07);
+  --good:#237A36; --good-soft:#DDF1E2; --coin-ink:#946200; --bad:#C2255C; --bad-soft:#F8DDE7; --xp:#3B5BDB;
+  --floor:#E8E1D1; --floor2:#DFD7C5; --wall:#3B3630; --wall-top:#574F45; --coin:#E09F12; --goal:#2B8A3E;
+  --soil:#8B5E3C; --soil2:#7A5134; --leaf:#3B8F3F; --ripe:#E8590C; --crate:#C0905F; --crate-edge:#8F6540; --robot:#D9480F; --robot-face:#FFF4EC;
+  --stone:#D3CAB8; --stone2:#CAC0AC; --stairs:#4A4238; --slime:#4E9F3D; --bat:#6741D9; --bone:#EFEADB; --boss:#A61E4D; --potion:#E03131;
+  --sign:#1C7ED6; --paint:#4C6EF5; --ghost:#7A8896;
+  --code-bg:#FFFEFA; --gutter:#8A8273;
+  --syn-kw:#A61E4D; --syn-str:#237A36; --syn-num:#C2410C; --syn-com:#66727F;
+  --code-fs:14px; --code-lh:22px; --tap:24px; --ease:cubic-bezier(.2,.7,.2,1); --syn-fn:#1C64C8; --syn-dir:#8B3FD1;
+  --f-display:"Kanit","IBM Plex Sans Thai Looped",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans Thai Looped",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#171512; --panel:#201D19; --panel2:#282420; --ink:#EDE6D8; --muted:#A99F8E; --line:#3A352E; --edge:#4D463C;
+  --accent:#FF7A33; --accent-ink:#1A0E06; --accent-soft:#3A2416; --accent-deep:#A8481A;
+  --note:#3A3220; --note-ink:#F1E3B5; --grid:rgba(255,240,210,.05);
+  --good:#5BC26C; --good-soft:#16301C; --bad:#F06595; --bad-soft:#3A1726; --xp:#748FFC;
+  --floor:#2A2621; --floor2:#25221E; --wall:#4E473D; --wall-top:#6A6153; --coin:#F2B630; --goal:#5BC26C;
+  --soil:#6B4A32; --soil2:#5C3F2B; --leaf:#5DB560; --ripe:#FF8A3D; --crate:#A87D53; --crate-edge:#7A5838; --robot:#FF7A33; --robot-face:#2A1608;
+  --stone:#2C2823; --stone2:#28241F; --stairs:#B5AA97; --slime:#69C455; --bat:#9775FA; --bone:#D9D3C2; --boss:#F0568C; --potion:#FF6B6B;
+  --sign:#4DABF7; --paint:#748FFC; --ghost:#6B7A89;
+  --code-bg:#1C1A17; --gutter:#7D7465; --coin-ink:#F2B630;
+  --syn-kw:#F783AC; --syn-str:#8CE99A; --syn-num:#FFB27A; --syn-com:#8391A0; --syn-fn:#74C0FC; --syn-dir:#D0A2FF; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#171512; --panel:#201D19; --panel2:#282420; --ink:#EDE6D8; --muted:#A99F8E; --line:#3A352E; --edge:#4D463C;
+  --accent:#FF7A33; --accent-ink:#1A0E06; --accent-soft:#3A2416; --accent-deep:#A8481A;
+  --note:#3A3220; --note-ink:#F1E3B5; --grid:rgba(255,240,210,.05);
+  --good:#5BC26C; --good-soft:#16301C; --bad:#F06595; --bad-soft:#3A1726; --xp:#748FFC;
+  --floor:#2A2621; --floor2:#25221E; --wall:#4E473D; --wall-top:#6A6153; --coin:#F2B630; --goal:#5BC26C;
+  --soil:#6B4A32; --soil2:#5C3F2B; --leaf:#5DB560; --ripe:#FF8A3D; --crate:#A87D53; --crate-edge:#7A5838; --robot:#FF7A33; --robot-face:#2A1608;
+  --stone:#2C2823; --stone2:#28241F; --stairs:#B5AA97; --slime:#69C455; --bat:#9775FA; --bone:#D9D3C2; --boss:#F0568C; --potion:#FF6B6B;
+  --sign:#4DABF7; --paint:#748FFC; --ghost:#6B7A89;
+  --code-bg:#1C1A17; --gutter:#7D7465; --coin-ink:#F2B630;
+  --syn-kw:#F783AC; --syn-str:#8CE99A; --syn-num:#FFB27A; --syn-com:#8391A0; --syn-fn:#74C0FC; --syn-dir:#D0A2FF; color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{height:100%;background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.55;overflow:hidden}
+/* one-screen app shell: top bar + three working panes, each pane scrolls on its own */
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:10px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.topbar{position:relative;display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:8px;flex:none}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:21px;letter-spacing:.02em;margin:0;line-height:1}
+.brand h1 span{color:var(--accent)}
+.lvbar{display:flex;align-items:center;gap:6px;flex:1 1 360px;min-width:0}
+.lvpick{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;color:var(--ink);text-align:left;font:inherit;height:36px}
+.lvpick:hover{border-color:var(--accent)}
+.lp-num{font-family:var(--f-mono);font-size:12.5px;color:var(--accent);font-weight:500;flex:none}
+.lp-name{font-family:var(--f-display);font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.lp-caret{margin-left:auto;color:var(--muted);flex:none;font-size:12px;white-space:nowrap}
+.navbtn{width:36px;height:36px;flex:none;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font-size:13px}
+.navbtn:hover:not(:disabled){border-color:var(--accent)}
+.navbtn:disabled{opacity:.4;cursor:not-allowed}
+.prog{display:flex;align-items:center;gap:8px;flex:0 0 150px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.prog .bar{flex:1}
+.modes{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);flex:none;margin-left:auto}
+.mode{font-family:var(--f-display);font-weight:600;font-size:14px;padding:7px 14px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.mode.on{background:var(--ink);color:var(--bg)}
+.lvmenu{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:40;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,.22);padding:14px;max-height:min(75vh,640px);overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.mchap h4{margin:0 0 2px;font-family:var(--f-display);font-weight:600;font-size:15px}
+.mchap small{display:block;font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em}
+.mrow{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--ink);cursor:pointer;font:inherit;font-size:14px;text-align:left}
+.mrow:hover{background:var(--panel2)}
+.mrow.cur{border-color:var(--accent);background:var(--accent-soft)}
+.mrow .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);width:30px;flex:none}
+.mrow .t{flex:1;min-width:0}
+.mrow .k{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:0 7px;flex:none}
+.mrow .s{width:34px;flex:none;text-align:right;font-size:12px;color:var(--coin-ink);letter-spacing:-1px}
+.mrow .s.todo{color:var(--line)}
+
+.panes{display:grid;grid-template-columns:minmax(290px,.8fr) minmax(0,1.1fr) minmax(0,1.05fr);gap:12px;min-height:0}
+.pane{min-height:0;min-width:0;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pane-head{flex:none;padding:12px 14px 0;border-bottom:1px solid var(--line)}
+.pane-head.simple{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;background:var(--panel2)}
+.pane-head.simple h3{margin:0;font-family:var(--f-display);font-weight:600;font-size:15px}
+.pane-body{flex:1;min-height:0;overflow:auto;padding:14px}
+.mnav{display:none}
+
+.lv:focus-visible,.btn:focus-visible,.mode:focus-visible,.tab:focus-visible,.lvpick:focus-visible,.mrow:focus-visible,.navbtn:focus-visible,.mtab:focus-visible,textarea:focus-visible,summary:focus-visible,input:focus-visible,.chip:focus-visible,.key:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:12px;background:var(--accent-soft);color:var(--ink);padding:1px 8px;border-radius:99px}
+.pane-head h2{font-family:var(--f-display);font-weight:700;font-size:21px;margin:3px 0 6px;text-wrap:balance;line-height:1.2}
+.pane h3.sub{font-family:var(--f-display);font-weight:600;font-size:15px;margin:14px 0 6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pane p{margin:0 0 10px}
+.tabs{display:flex;gap:2px}
+.tab{font-family:var(--f-display);font-weight:600;font-size:14px;padding:7px 11px;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:transparent;color:var(--muted);cursor:pointer}
+.tab.on{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-left:5px;vertical-align:middle}
+.intro{background:var(--accent-soft);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13.5px}
+.intro ol{margin:0 0 8px;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px}
+.intro li b{font-family:var(--f-mono);color:var(--accent);margin-right:6px}
+.story{border-left:3px solid var(--accent);padding:3px 0 3px 12px;margin:0 0 10px;font-size:13.5px;color:var(--muted)}
+.story b{color:var(--ink);font-weight:600}
+.lesson-body{font-size:14px}
+.lesson-body p{margin:0 0 8px}
+.lesson-body ul{margin:0 0 8px;padding-left:20px}
+.lesson-body li{margin-bottom:2px}
+.lesson-body table{border-collapse:collapse;font-size:13px;margin:0 0 8px}
+.lesson-body td,.lesson-body th{border:1px solid var(--line);padding:3px 8px;text-align:left}
+pre.ex{font-family:var(--f-mono);font-size:13px;line-height:1.55;background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:9px 11px;margin:6px 0 8px;overflow-x:auto;white-space:pre}
+.exrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.goals{display:flex;flex-direction:column;gap:4px;margin:8px 0 12px;font-size:13.5px}
+.goals div{display:flex;gap:8px;align-items:baseline}
+.goals b.m{font-family:var(--f-mono);font-weight:500;width:16px;flex:none;color:var(--coin-ink)}
+.goals .g0 b.m{color:var(--good)}
+.goals .gv b.m{color:var(--muted)}
+.goals code{font-family:var(--f-mono);font-size:12.5px;background:var(--panel2);padding:1px 5px;border-radius:4px;word-break:break-all}
+.chips-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{font-family:var(--f-mono);font-size:12.5px;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:3px 8px;color:var(--ink);cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--accent);background:var(--accent-soft)}
+.hintrow{display:flex;flex-direction:column;gap:8px}
+.hint{font-size:13.5px;background:var(--panel2);border-left:3px solid var(--coin);padding:8px 10px;border-radius:0 6px 6px 0}
+code{font-family:var(--f-mono);font-size:.92em}
+.cta{margin-top:12px;padding:10px 12px;border:1px dashed var(--accent);border-radius:8px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:13.5px}
+.note{font-size:13px;color:var(--muted);background:var(--panel2);border-radius:6px;padding:7px 10px;margin-bottom:10px}
+.mobile-only{display:none}
+
+.pline{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13.5px;margin:4px 0 4px}
+.pline b{font-family:var(--f-mono);font-weight:500}
+.gold{color:var(--coin-ink);font-family:var(--f-mono);font-weight:500}
+.shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.item{border:1px solid var(--line);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:6px;background:var(--panel2);min-width:0}
+.item .ih{display:flex;justify-content:space-between;gap:8px;font-family:var(--f-display);font-weight:600}
+.item .ih small{font-family:var(--f-mono);font-weight:400;font-size:11.5px;color:var(--muted)}
+.item p{margin:0;font-size:12.5px;color:var(--muted);flex:1}
+.item .btn{align-self:flex-start}
+
+.btn{font-family:var(--f-display);font-weight:600;font-size:14px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.big{font-size:15px;padding:8px 20px}
+.btn.ghost{background:transparent}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn.sm{font-size:13px;padding:5px 10px}
+
+/* editor pane */
+.ed-bar{flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px 7px 14px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.ed-bar .file{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.code{display:flex;flex:1 1 auto;min-height:120px;background:var(--code-bg)}
+.gutter{font-family:var(--f-mono);font-size:var(--code-fs);line-height:var(--code-lh);color:var(--gutter);text-align:right;padding:12px 8px 12px 10px;user-select:none;overflow:hidden;min-width:44px;border-right:1px solid var(--line);font-variant-numeric:tabular-nums}
+.gutter div.err{color:var(--bad);font-weight:600}
+.edwrap{position:relative;flex:1;min-width:0}
+.hl,textarea#code{position:absolute;inset:0;margin:0;border:0;font-family:var(--f-mono);font-size:var(--code-fs);line-height:var(--code-lh);padding:12px 14px;white-space:pre;tab-size:4;letter-spacing:0;font-variant-ligatures:none}
+.hl{overflow:hidden;color:var(--ink);pointer-events:none}
+.hl div{min-height:var(--code-lh)}
+.hl div.errl{background:var(--bad-soft)}
+textarea#code{resize:none;background:transparent;color:transparent;caret-color:var(--ink);overflow:auto;outline:none;-webkit-text-fill-color:transparent}
+textarea#code::selection{background:rgba(217,72,15,.28);-webkit-text-fill-color:transparent}
+textarea#code::placeholder{color:var(--muted);-webkit-text-fill-color:var(--muted)}
+textarea#code:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
+.k-kw{color:var(--syn-kw);font-weight:500}.k-str{color:var(--syn-str)}.k-num{color:var(--syn-num)}.k-com{color:var(--syn-com);font-style:italic}.k-fn{color:var(--syn-fn)}.k-dir{color:var(--syn-dir);font-weight:500}
+.fixnote{flex:none;font-size:12.5px;color:var(--muted);padding:5px 12px;background:var(--accent-soft)}
+.keybar{flex:none;display:flex;gap:5px;overflow-x:auto;padding:6px 10px;border-top:1px solid var(--line);background:var(--panel2)}
+.key{font-family:var(--f-mono);font-size:14px;min-width:36px;height:34px;padding:0 9px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;flex:none}
+@media (hover:hover) and (pointer:fine){.keybar{display:none}}
+.runbar{flex:none;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;padding:8px 10px;border-top:1px solid var(--line)}
+.runbar .left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.kbd{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.speed{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.speed input[type=range]{accent-color:var(--accent);width:100px}
+.speed input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.console{flex:0 0 30%;min-height:110px;display:flex;flex-direction:column;border-top:1px solid var(--line);background:var(--panel2)}
+.console h3{flex:none;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;padding:6px 10px 6px 14px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+#out{flex:1;min-height:0;overflow:auto;font-family:var(--f-mono);font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word;background:var(--code-bg);border-top:1px solid var(--line);padding:8px 14px}
+#out .e{color:var(--bad)}
+#out .x{color:var(--muted);font-family:var(--f-body)}
+#out .sys{color:var(--muted)}
+#out .in{color:var(--xp)}
+#out .lvl{color:var(--xp);font-weight:500}
+
+/* result pane */
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:12px;overflow:hidden}
+.stage{position:relative;flex:1;min-height:160px;display:flex;justify-content:center;align-items:center;background:var(--panel2);border-radius:8px;padding:12px;overflow:hidden}
+canvas{display:block;max-width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.result{position:absolute;inset:auto 10px 10px 10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.result.inline{position:static;box-shadow:none;flex:none}
+.result.ok{border-color:var(--good)}
+.result.fail{border-color:var(--bad)}
+.result .rt{font-family:var(--f-display);font-weight:700;font-size:17px}
+.result.ok .rt{color:var(--good)}
+.result.fail .rt{color:var(--bad)}
+.result .rs{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+.result .rs b{color:var(--ink);font-weight:600}
+.stats{flex:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.stat{background:var(--panel2);border-radius:7px;padding:6px 10px;min-width:0}
+.stat.full{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.stat .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--f-display);font-weight:600;font-size:18px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat.full .v{font-size:15px}
+.stat .v small{font-size:12px;color:var(--muted);font-weight:500}
+.bar{height:10px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--line);min-width:0}
+.bar i{display:block;height:100%;width:0;background:var(--good);transition:width .15s}
+.bar.mid i{background:var(--coin)}
+.bar.low i{background:var(--bad)}
+.bar.xp i{background:var(--xp)}
+.bench{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.tests{overflow-x:auto;border:1px solid var(--line);border-radius:8px;flex:none}
+.tests table{border-collapse:collapse;width:100%;font-size:13px;min-width:360px}
+.tests td:first-child,.tests th:first-child{width:28px}.tests td.st{width:28px}
+.tests th{font-family:var(--f-mono);font-weight:500;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 10px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.tests td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.tests tr:last-child td{border-bottom:0}
+.tests tr.focus td{background:var(--bad-soft)}
+.tests td pre{margin:0;font-family:var(--f-mono);font-size:12.5px;white-space:pre-wrap;word-break:break-word}
+.tests td.given code{display:inline-block;background:var(--panel2);border-radius:4px;padding:1px 5px;margin:1px 0;white-space:pre-wrap;word-break:break-word}
+.tests td.st{font-family:var(--f-display);font-weight:700;white-space:nowrap}
+.tests td.st.ok{color:var(--good)}
+.tests td.st.no{color:var(--bad)}
+.tests td.st.wait{color:var(--muted);font-weight:500}
+.tests td .why{display:block;color:var(--bad);font-size:12px;margin-top:3px}
+.tests td .soft{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.empty-out{color:var(--muted);font-style:italic}
+.codecheck{font-size:13px;background:var(--bad-soft);border-radius:6px;padding:7px 10px;flex:none}
+.rstatus{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+details.ref{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+details.ref summary{cursor:pointer;font-family:var(--f-display);font-weight:600;font-size:14px}
+.reftable{overflow-x:auto}
+.reftable table{border-collapse:collapse;font-size:13px;width:100%}
+.reftable td{padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.reftable td:first-child{font-family:var(--f-mono);white-space:nowrap}
+.reftable td.c{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+.loading{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+
+/* narrow screens: one pane at a time, switched from a bottom tab bar */
+@media (max-width:1099px){
+  .panes{grid-template-columns:minmax(0,1fr)}
+  .panes>.pane{display:none}
+  .panes[data-view="brief"]>#paneBrief,.panes[data-view="code"]>#paneCode,.panes[data-view="result"]>#paneResult{display:flex}
+  .mnav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .mtab{font-family:var(--f-display);font-weight:600;font-size:14px;height:44px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+  .mtab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .mtab .bd{font-size:12px}
+  .mtab .bd.ok{color:var(--good)}.mtab .bd.no{color:var(--bad)}
+  .mobile-only{display:block}
+  .prog{display:none}
+  .lvbar{order:3;flex-basis:100%}
+  .console{flex-basis:34%}
+}
+@media (max-width:520px){.brand h1{font-size:18px!important}.lp-all{display:none}.mode{padding:6px 10px;font-size:13px}}
+/* ---- UX polish layer: press feedback, target sizes, mobile ergonomics ---- */
+html,body{height:100dvh}
+button,.chip,.key,.mrow,summary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.btn,.navbtn,.lvpick,.chip,.key,.mtab,.mode,.tab,.mrow{transition:background-color .15s var(--ease),border-color .15s var(--ease),color .15s var(--ease),transform .1s var(--ease)}
+.btn,.navbtn,.chip,.mode,.tab,.mrow{min-height:var(--tap)}
+#clearOut{min-height:24px}
+
+/* ---- workshop skin: paper, ink, physical keys — less "generated dashboard" ---- */
+body{font-size:15px}
+/* plain-language labels instead of tracked uppercase mono */
+.eyebrow,.console h3,.stat .k,.tests th,.mchap small{font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:500}
+.console h3{font-size:13px;color:var(--ink)}
+.tests th{color:var(--muted);font-weight:600}
+.brand h1{font-family:var(--f-display);font-weight:600;font-size:22px;letter-spacing:0;display:flex;align-items:center;gap:8px}
+.brand h1 span{color:inherit}
+.brand svg{flex:none}
+.pane-head h2,.pane-head.simple h3,.pane h3.sub,.mchap h4{font-weight:600;letter-spacing:0}
+.pane-head h2{font-size:23px}
+/* panels: flat paper sheets with a firm edge, tighter corners */
+.pane{border-radius:6px;border-color:var(--edge)}
+.pane-head.simple,.ed-bar,.console,.keybar{background:var(--panel2)}
+.lvpick,.navbtn,.modes{border-radius:5px;border-color:var(--edge)}
+.lvmenu{border-radius:6px;border-color:var(--edge);box-shadow:0 3px 0 var(--edge),0 18px 40px rgba(40,30,10,.18)}
+.mrow{border-radius:4px}
+.mrow .k{border-radius:3px}
+/* buttons behave like keys: a bottom lip that presses down */
+.btn{border-radius:5px;border-color:var(--edge);box-shadow:0 2px 0 var(--edge)}
+.btn.ghost{box-shadow:none;border-color:transparent;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.btn.ghost:hover:not(:disabled){text-decoration-color:var(--accent);border-color:transparent}
+.btn.primary{border-color:var(--accent-deep);box-shadow:0 3px 0 var(--accent-deep)}
+.btn.danger{box-shadow:0 2px 0 var(--bad)}
+.btn:disabled{box-shadow:none}
+.navbtn,.key,.chip{box-shadow:0 2px 0 var(--line)}
+.btn:active:not(:disabled),.navbtn:active:not(:disabled),.key:active,.chip:active{transform:translateY(2px);box-shadow:0 0 0 transparent}
+.btn.primary:hover:not(:disabled){background:#B23B0A;border-color:var(--accent-deep)}
+.btn svg,.navbtn svg,.lp-caret svg{flex:none;display:block}
+.navbtn{display:grid;place-items:center}
+.lp-caret{display:flex;align-items:center;gap:4px}
+/* small labels: a code token, not a pill */
+.tag{font-family:var(--f-mono);font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:0 6px;color:var(--muted)}
+.chip{border-radius:4px;background:var(--panel)}
+/* the "how to start" card is a sticky note, hints are notes too */
+.intro{background:var(--note);color:var(--note-ink);border-radius:2px;transform:rotate(-.6deg);box-shadow:0 1px 0 rgba(0,0,0,.06),0 6px 14px -8px rgba(60,45,0,.35);margin:4px 4px 14px}
+.intro li b{color:var(--note-ink);opacity:.7}
+.intro .btn{background:transparent;border-color:color-mix(in srgb,currentColor 40%,transparent);box-shadow:none;color:inherit}
+.hint{background:var(--note);color:var(--note-ink);border-left:0;border-radius:2px}
+.story{border-left:0;padding:8px 10px;background:var(--panel2);border-radius:4px;font-style:normal}
+.cta{border:1.5px solid var(--ink);border-radius:5px;background:var(--panel2)}
+.note{border-radius:4px}
+pre.ex{border-radius:4px}
+/* test chamber sits on graph paper */
+.stage{border-radius:4px;background-color:var(--panel2);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:16px 16px}
+.result{border-radius:5px;box-shadow:0 3px 0 var(--edge)}
+.result.inline{box-shadow:none}
+.result.ok{box-shadow:0 3px 0 var(--good)}
+.result.fail{box-shadow:0 3px 0 var(--bad)}
+.result.inline.ok,.result.inline.fail{box-shadow:none;border-width:1.5px}
+.stat{border-radius:4px}
+.tests{border-radius:4px}
+.mode{font-weight:500}
+.mode.on{background:var(--ink);color:var(--panel)}
+.tab{font-weight:500}
+.tab.on{font-weight:600}
+.mtab{border-radius:6px}
+.mtab.on{box-shadow:0 2px 0 var(--accent)}
+textarea#code::selection{background:rgba(194,65,12,.25)}
+/* touch devices: 44px targets, 16px code (stops iOS zoom-on-focus) */
+@media (pointer:coarse){
+  :root{--tap:44px;--code-fs:16px;--code-lh:24px}
+  .navbtn,.lvpick{height:44px}.navbtn{width:44px}
+  .btn{padding-block:10px}
+  .btn.sm{padding-block:8px}
+  .chip{padding:8px 12px;font-size:13.5px}
+  .chips{gap:8px}
+  .key{height:44px;min-width:44px}
+  .mode{padding-inline:16px}
+  #clearOut{min-height:36px;padding-inline:12px!important}
+  .runbar .kbd{display:none}
+  .speed input[type=range]{width:120px;height:32px}
+  .speed input[type=checkbox]{width:22px;height:22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><h1><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="3" y="7" width="20" height="15" rx="3" fill="var(--robot)"/><rect x="7" y="11" width="12" height="6" rx="1.5" fill="var(--robot-face)"/><circle cx="10.5" cy="14" r="1.4" fill="var(--ink)"/><circle cx="15.5" cy="14" r="1.4" fill="var(--ink)"/><path d="M13 7V3.5" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round"/><circle cx="13" cy="3" r="1.8" fill="var(--accent)"/></svg>Robo Workshop</h1></div>
+    <div class="lvbar" id="lvbar">
+      <button class="navbtn" id="prevLv" aria-label="ด่านก่อนหน้า"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="lvpick" id="lvPick" aria-haspopup="true" aria-expanded="false"><span class="lp-num" id="lpNum"></span><span class="lp-name" id="lpName"></span><span class="lp-caret"><span class="lp-all">ทุกด่าน</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
+      <button class="navbtn" id="nextLv" aria-label="ด่านถัดไป"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+      <div class="prog" title="ความคืบหน้า"><div class="bar"><i id="progBar"></i></div><span id="progTxt"></span></div>
+    </div>
+    <div class="modes" role="tablist" aria-label="โหมดเกม">
+      <button class="mode" id="mTut" role="tab">บทเรียน</button>
+      <button class="mode" id="mDun" role="tab">ดันเจี้ยน</button>
+    </div>
+    <div class="lvmenu" id="lvMenu" hidden></div>
+  </header>
+
+  <main class="panes" id="panes" data-view="brief">
+    <!-- 1. mission / lesson -->
+    <section class="pane" id="paneBrief" aria-label="โจทย์">
+      <div id="tutBrief" style="display:contents">
+        <div class="pane-head">
+          <div class="eyebrow"><span id="lvNum"></span><span class="tag" id="lvConcept"></span></div>
+          <h2 id="lvTitle"></h2>
+          <div class="tabs" role="tablist">
+            <button class="tab" data-tab="mission" role="tab">ภารกิจ</button>
+            <button class="tab" data-tab="lesson" role="tab">บทเรียน</button>
+            <button class="tab" data-tab="ref" role="tab">คำสั่งหุ่น</button>
+          </div>
+        </div>
+        <div class="pane-body">
+          <div class="intro" id="intro" hidden>
+            <ol><li><b>1</b>อ่านภารกิจและบทเรียนในช่องนี้</li><li><b>2</b>เขียนโค้ดในช่องกลาง</li><li><b>3</b>กด ▶ Run ผลจะขึ้นใต้โค้ดและในช่องขวา</li></ol>
+            <button class="btn sm" id="introClose">เข้าใจแล้ว</button>
+          </div>
+          <div id="tab-mission">
+            <div class="story" id="lvStory"></div>
+            <p id="lvBrief"></p>
+            <div class="goals" id="lvGoals"></div>
+            <div class="chips-label">กดเพื่อแทรกลงในโค้ด</div>
+            <div class="chips" id="lvApi"></div>
+            <div class="hintrow">
+              <div id="hints" class="hintrow"></div>
+              <div><button class="btn sm ghost" id="hintBtn">ขอคำใบ้</button></div>
+            </div>
+            <div class="mobile-only" style="margin-top:14px"><button class="btn primary" data-go="code">เริ่มเขียนโค้ด →</button></div>
+            <div class="cta" id="tutCta" hidden><span>ผ่านบทที่ 1–4 ครบแล้ว ไปเขียน AI ให้หุ่นตีมอนในดันเจี้ยนได้เลย</span><button class="btn sm primary" id="goDun">เข้าดันเจี้ยน →</button></div>
+          </div>
+          <div id="tab-lesson" hidden>
+            <div class="lesson-body" id="lessonBody"></div>
+            <div class="exrow"><button class="btn sm" id="exBtn" disabled><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>ลองรันตัวอย่าง</button><span class="loading" id="exNote"></span></div>
+            <div style="margin-top:12px"><button class="btn sm primary" id="toMission">เข้าใจแล้ว ไปทำภารกิจ →</button></div>
+          </div>
+          <div id="tab-ref" hidden>
+            <div class="reftable"><table id="refTable"></table></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="dunBrief" hidden style="display:contents">
+        <div class="pane-head" style="padding-bottom:10px">
+          <div class="eyebrow"><span id="dFloorLbl">ชั้น 1</span><span class="tag">โหมดเลเวลอัพ</span></div>
+          <h2>ดันเจี้ยนหุ่นยนต์</h2>
+        </div>
+        <div class="pane-body">
+          <p>เขียนสคริปต์ AI ให้ Bolt หาบันไดแล้วลงไปชั้นถัดไป มอนสเตอร์ขยับและโจมตีหลังทุก action ของเรา ต้องตีด้วย <code>attack()</code> ทุก 5 ชั้นมีบอสเฝ้าบันได</p>
+          <div class="note" id="dNote"></div>
+          <div class="pline" id="dSummary"></div>
+          <div class="hintrow" style="margin-top:10px">
+            <div id="dHints" class="hintrow"></div>
+            <div><button class="btn sm ghost" id="dHintBtn">ขอคำใบ้</button></div>
+          </div>
+          <h3 class="sub"><span>ร้านอัปเกรด</span><span class="gold" id="goldLbl"></span></h3>
+          <div class="shop" id="shop"></div>
+          <details class="ref">
+            <summary>คำสั่งในดันเจี้ยน</summary>
+            <div class="reftable"><table id="dRef"></table></div>
+          </details>
+          <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn sm ghost" id="wipeBtn">รีเซ็ตความคืบหน้าดันเจี้ยน</button>
+            <span id="wipeAsk" hidden style="font-size:13px">ลบเลเวล ทอง และของทั้งหมด? <button class="btn sm danger" id="wipeYes">ลบเลย</button> <button class="btn sm ghost" id="wipeNo">ยกเลิก</button></span>
+          </div>
+          <div class="mobile-only" style="margin-top:14px"><button class="btn primary" data-go="code">เขียนโค้ด →</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. code + output -->
+    <section class="pane" id="paneCode" aria-label="โค้ด">
+      <div class="ed-bar">
+        <span class="file" id="fileName">main.py</span>
+        <button class="btn sm ghost" id="resetCode" title="กลับไปใช้โค้ดเริ่มต้น">เริ่มโค้ดใหม่</button>
+      </div>
+      <div class="code">
+        <div class="gutter" id="gutter" aria-hidden="true"></div>
+        <div class="edwrap">
+          <div class="hl" id="hl" aria-hidden="true"></div>
+          <textarea id="code" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" aria-label="โค้ด Python" placeholder="เขียนโค้ด Python ตรงนี้"></textarea>
+        </div>
+      </div>
+      <div class="fixnote" id="fixNote" hidden></div>
+      <div class="keybar" id="keybar" aria-label="ปุ่มลัดพิมพ์โค้ด"></div>
+      <div class="runbar">
+        <div class="left">
+          <button class="btn primary big" id="runBtn" disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>Run</button>
+          <button class="btn sm" id="stopBtn" disabled title="ข้าม animation ไปดูผลลัพธ์"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 5v14l10-7zM16 5h3v14h-3z"/></svg>ข้าม</button>
+          <span class="loading" id="loadMsg" role="status">กำลังโหลด Python…</span>
+          <span class="kbd">Ctrl/⌘ + Enter</span>
+        </div>
+        <label class="speed" for="speed" id="speedWrap">ความเร็ว <input type="range" id="speed" min="1" max="6" value="3"> <span id="speedLbl">ปกติ</span></label>
+        <label class="speed" for="auto" id="autoWrap" hidden><input type="checkbox" id="auto"> ผ่านแล้วลงชั้นต่อไปเอง</label>
+      </div>
+      <div class="console">
+        <h3><span>ผลลัพธ์จาก print()</span><button class="btn sm ghost" id="clearOut" style="font-size:12.5px;padding:2px 8px">ล้าง</button></h3>
+        <div id="out" role="log" aria-live="polite" aria-label="ผลลัพธ์จาก print()"><span class="x">ผลจาก print() และ error จะแสดงที่นี่</span></div>
+      </div>
+    </section>
+
+    <!-- 3. results -->
+    <section class="pane" id="paneResult" aria-label="ผลลัพธ์">
+      <div class="pane-head simple"><h3 id="resTitle">สนามทดสอบ</h3><span class="rstatus" id="benchNote"></span><div class="legend" id="legend"></div></div>
+      <div class="rbody">
+        <div class="stage" id="stage"><canvas id="cv"></canvas><div class="result" id="result" role="status" aria-live="polite" hidden></div></div>
+        <div class="bench" id="bench" hidden>
+          <div class="result inline" id="termResult" role="status" aria-live="polite" hidden></div>
+          <div class="codecheck" id="codeCheck" hidden></div>
+          <div class="tests"><table id="testTable"></table></div>
+        </div>
+        <div class="stats" id="stats"></div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="mnav" id="mnav" aria-label="สลับหน้าจอ">
+    <button class="mtab" data-view="brief">โจทย์</button>
+    <button class="mtab" data-view="code">โค้ด</button>
+    <button class="mtab" data-view="result">ผลลัพธ์ <span class="bd" id="resBadge"></span></button>
+  </nav>
+</div>
+
+<script>
+/*ENGINE-START*/
+const DIRS={North:[0,1],South:[0,-1],East:[1,0],West:[-1,0]};
+const GROW=24, MAX_TICKS=6000, MAX_SENSE=200000, D_MAX_TICKS=3000;
+class GameError extends Error{constructor(py,msg){super(msg);this.py=py;}}
+class StopSignal extends Error{}
+
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function ri(r,lo,hi){return lo+Math.floor(r()*(hi-lo+1));}
+
+function makeWorld(w,h,fill='empty'){
+  return{w,h,cells:Array.from({length:w*h},()=>({t:fill})),rx:0,ry:0,dir:'East',tick:0,coins:0,totalCoins:0,harvested:0};
+}
+function at(W,x,y){return W.cells[y*W.w+x];}
+function cloneWorld(W){return{...W,cells:W.cells.map(c=>({...c})),mons:W.mons?W.mons.map(m=>({...m})):undefined,ps:W.ps?{...W.ps}:undefined};}
+
+function bfs(W,sx,sy){
+  const d=new Array(W.w*W.h).fill(-1);const q=[[sx,sy]];d[sy*W.w+sx]=0;
+  while(q.length){const[x,y]=q.shift();for(const[dx,dy]of Object.values(DIRS)){const nx=x+dx,ny=y+dy;
+    if(nx<0||ny<0||nx>=W.w||ny>=W.h)continue;if(at(W,nx,ny).t==='wall'||d[ny*W.w+nx]>=0)continue;
+    d[ny*W.w+nx]=d[y*W.w+x]+1;q.push([nx,ny]);}}
+  return d;
+}
+/* self-avoiding random path from (0,0); returns list of [x,y,letterToNext] */
+function randomPath(r,N,minLen,maxLen){
+  for(;;){
+    const L=ri(r,minLen,maxLen),path=[[0,0]],seen=new Set(['0,0']),steps=[];
+    while(path.length<L){const[x,y]=path[path.length-1];
+      const nb=[[1,0,'R'],[-1,0,'L'],[0,1,'U'],[0,-1,'D']].map(([dx,dy,s])=>[x+dx,y+dy,s]).filter(([a,b])=>a>=0&&b>=0&&a<N&&b<N&&!seen.has(a+','+b));
+      if(!nb.length)break;const n=nb[Math.floor(r()*nb.length)];steps.push(n[2]);seen.add(n[0]+','+n[1]);path.push([n[0],n[1]]);}
+    if(path.length>=L)return{path,steps};
+  }
+}
+const onGoal=W=>at(W,W.rx,W.ry).t==='goal'
+  ?{ok:true,msg:'Bolt ถึงธงแล้ว'}:{ok:false,msg:'จบโค้ดแล้ว แต่ Bolt ยังไม่ได้ยืนบนธง'};
+const allCoins=W=>W.coins===W.totalCoins?{ok:true,msg:`เก็บครบ ${W.coins} เหรียญ`}:{ok:false,msg:`เก็บได้ ${W.coins} จาก ${W.totalCoins} เหรียญ`};
+
+/* ---- code clean-up before running: fixes that trip beginners (smart quotes from phones/slides, tabs, full-width punctuation) ---- */
+function normalizeCode(code){
+  return code.replace(/[\u201C\u201D\u201E\u201F\u2033\u00AB\u00BB]/g,'"').replace(/[\u2018\u2019\u201A\u201B\u2032]/g,"'")
+    .replace(/\t/g,'    ').replace(/\u00A0/g,' ').replace(/\uFF08/g,'(').replace(/\uFF09/g,')').replace(/\uFF1A/g,':').replace(/\uFF0C/g,',').replace(/\uFF1D/g,'=').replace(/\u200B/g,'');
+}
+
+/* ---- output judging (test bench) ---- */
+function normLines(s){return String(s).split('\n').map(l=>l.trim().replace(/\s+/g,' ')).filter(l=>l!=='');}
+const isNum=s=>s!==''&&!isNaN(Number(s));
+function sameLine(a,b,tol){
+  if(a===b)return true;
+  if(isNum(a)&&isNum(b))return Math.abs(Number(a)-Number(b))<=(tol||1e-9);
+  // expected is a number, got "Average: 81.67" → compare the last token
+  if(isNum(b)){const last=a.split(' ').pop().replace(/[.,;:!]+$/,'');if(isNum(last))return Math.abs(Number(last)-Number(b))<=(tol||1e-9);}
+  return false;
+}
+const MARK='@@T@@', MARKE='@@E@@';
+function harnessFor(calls){
+  if(!calls)return '';
+  return '\n'+calls.map(c=>`try:\n    print("${MARK}"+repr(${c}))\nexcept Exception as __e:\n    print("${MARKE}"+type(__e).__name__+": "+str(__e))`).join('\n')+'\n';
+}
+function compareLines(got,exp,tol){
+  if(got.length===exp.length&&got.every((g,i)=>sameLine(g,exp[i],tol)))return{ok:true};
+  // extra debug prints before the answer: accept if the last lines match
+  if(got.length>exp.length){const tail=got.slice(got.length-exp.length);
+    if(tail.every((g,i)=>sameLine(g,exp[i],tol)))return{ok:true,soft:`มี ${got.length-exp.length} บรรทัดเกินมาข้างหน้า (ระบบให้ผ่าน แต่ลองลบ print ที่ใช้ทดสอบออก)`};}
+  let why;
+  if(got.length!==exp.length)why=`ได้ ${got.length} บรรทัด แต่ต้องได้ ${exp.length} บรรทัด`;
+  else{const i=got.findIndex((g,k)=>!sameLine(g,exp[k],tol));why=`บรรทัดที่ ${i+1}: ต้องได้ "${exp[i]}" แต่ได้ "${got[i]}"`;
+    if(got[i].toLowerCase()===exp[i].toLowerCase())why+=' (ตัวพิมพ์ใหญ่-เล็กต่างกัน)';
+    else if(got[i].includes(exp[i]))why+=' (มีข้อความเกินมา)';
+    else if(got[i].replace(/[.\s]/g,'')===exp[i].replace(/[.\s]/g,''))why+=' (ต่างกันแค่จุดหรือเว้นวรรค)';}
+  return{ok:false,why};
+}
+function judge(t,printed,tol){
+  const lines=String(printed).split('\n');
+  if(t.calls){
+    const got=lines.filter(l=>l.startsWith(MARK)||l.startsWith(MARKE)).map(l=>l.startsWith(MARK)?l.slice(MARK.length):'ERROR '+l.slice(MARKE.length));
+    const ok=got.length===t.expectCalls.length&&got.every((g,i)=>sameLine(g.trim(),t.expectCalls[i],tol));
+    let why='';
+    if(!ok){if(got.some(g=>g==='None'))why='ฟังก์ชันคืนค่า None — ใช้ print แทน return หรือลืม return หรือเปล่า?';
+      else if(got.some(g=>g.startsWith('ERROR NameError')))why='ไม่เจอฟังก์ชันชื่อนี้ ตรวจชื่อฟังก์ชันให้ตรงกับโจทย์';
+      else if(got.some(g=>g.startsWith('ERROR')))why='ฟังก์ชันเกิด error ตอนถูกเรียก';
+      else if(t.expectCalls.some(e=>/^'.*'$/.test(e))&&got.some(g=>!/^'.*'$/.test(g)))why='ต้อง return เป็นข้อความ (มีเครื่องหมายคำพูด) เช่น return "A"';}
+    return{ok,got,why};
+  }
+  const clean=lines.filter(l=>!l.startsWith(MARK)&&!l.startsWith(MARKE)).join('\n');
+  const got=normLines(clean),c=compareLines(got,normLines(t.expect),tol);
+  return{ok:c.ok,got,why:c.why||'',soft:c.soft||''};
+}
+function codeIssues(L,code){
+  const out=[];
+  for(const r of L.mustHave||[])if(!r.re.test(code))out.push(r.msg);
+  for(const r of L.mustNot||[])if(r.re.test(code))out.push(r.msg);
+  return out;
+}
+
+const CHAPTERS=[
+  {name:'พื้นฐาน Python',week:'สัปดาห์ 1',area:'ห้องเปิดเครื่อง'},
+  {name:'List · เงื่อนไข · Loop',week:'สัปดาห์ 2',area:'โกดังสินค้า'},
+  {name:'Tuple · Set · Dictionary',week:'สัปดาห์ 3',area:'ห้องข้อมูล'},
+  {name:'Function · f-string · try/except',week:'สัปดาห์ 4',area:'สายการผลิต'},
+  {name:'โจทย์อัลกอริทึม',week:'ท้าทาย',area:'ชั้นใต้ดิน'},
+];
+const literalAssign=name=>({re:new RegExp(`^\\s*${name}\\s*=\\s*[-\\d.\\[\\{("']`,'m'),msg:`ไม่ต้องสร้าง ${name} เอง ระบบกำหนดค่าให้ในแต่ละ test แล้ว (ถ้ากำหนดเอง test อื่นจะผิด)`});
+
+const LEVELS=[
+/* ===== บทที่ 1 ===== */
+ {id:'print',ch:0,kind:'term',name:'สวัสดี Python',concept:'print() · string',
+  story:'<b>หัวหน้าโรงงาน:</b> หุ่น Bolt เพิ่งเปิดเครื่องครั้งแรก มาสอนให้มันพูดทักทายกันก่อน',
+  lesson:{html:`<p>Programming คือการบอกคอมพิวเตอร์ทีละขั้นว่าต้องทำอะไร Python อ่านโค้ด<b>จากบนลงล่างทีละบรรทัด</b></p>
+<ul><li><code>print()</code> ใช้แสดงผล ของที่จะแสดงใส่ไว้ในวงเล็บ</li>
+<li>ข้อความ (string) ต้องอยู่ในเครื่องหมายคำพูด <code>"..."</code> หรือ <code>'...'</code> ส่วนตัวเลขไม่ต้อง</li>
+<li>ใส่หลายค่าในวงเล็บได้ คั่นด้วย <code>,</code> แล้ว Python จะเว้นวรรคให้เอง</li>
+<li>บรรทัดที่ขึ้นต้นด้วย <code>#</code> คือ comment Python จะข้ามไป ใช้เขียนโน้ตให้ตัวเอง</li></ul>`,
+   example:'print("Hello")\nprint(\'สวัสดี\')\nprint(2 + 3)        # ไม่มีเครื่องหมายคำพูด = คำนวณ\nprint("2 + 3")      # มีเครื่องหมายคำพูด = ข้อความ\nprint("ผลรวม:", 2 + 3)'},
+  brief:'ให้โปรแกรมแสดง 2 บรรทัด บรรทัดแรกคือ Hello Robot บรรทัดที่สองคือ 5 + 3 = 8 โดยให้ Python เป็นคนคำนวณ 5 + 3 เอง',
+  goal:'ผลลัพธ์ตรงกับชุดทดสอบ',
+  api:['print("Hello Robot")','print("ข้อความ", 5 + 3)'],
+  hints:['บรรทัดแรกแค่ print ข้อความ <code>"Hello Robot"</code>','บรรทัดที่สองใช้ 2 ค่าคั่นด้วยจุลภาค: ข้อความ <code>"5 + 3 ="</code> กับการคำนวณ <code>5 + 3</code> ที่ไม่มีเครื่องหมายคำพูด'],
+  starter:'# แก้โค้ดให้แสดงผลตามภารกิจ\nprint("Hello")\n',
+  parLines:2,
+  mustNot:[{re:/["'][^"'\n]*=\s*8\s*["']/,msg:'อย่าพิมพ์ "= 8" เองในข้อความ ให้ Python คำนวณ 5 + 3 (เขียนไว้นอกเครื่องหมายคำพูด)'}],
+  tests:[{expect:'Hello Robot\n5 + 3 = 8'}]},
+
+ {id:'vars',ch:0,kind:'term',name:'ร้านอะไหล่ลดราคา',concept:'ตัวแปร · operator',
+  story:'<b>ลูกค้าโทรมา:</b> "อะไหล่ลดราคาแล้วรวม VAT เหลือเท่าไหร่?" ให้ Bolt คิดให้หน่อย',
+  lesson:{html:`<p><b>ตัวแปร (variable)</b> คือกล่องที่มีชื่อ ใช้เก็บค่าไว้ใช้ทีหลัง สร้างด้วย <code>ชื่อ = ค่า</code></p>
+<ul><li><code>=</code> แปลว่า "เอาค่าทางขวาไปเก็บในชื่อทางซ้าย" ไม่ได้แปลว่าเท่ากับแบบคณิตศาสตร์</li>
+<li>ตั้งชื่อด้วยตัวอักษรอังกฤษ ตัวเลข และ _ ห้ามขึ้นต้นด้วยตัวเลข ห้ามเว้นวรรค เช่น <code>final_price</code></li>
+<li>operator: <code>+</code> บวก <code>-</code> ลบ <code>*</code> คูณ <code>/</code> หาร (ทำ * กับ / ก่อน + กับ - เหมือนคณิตศาสตร์)</li></ul>`,
+   example:'price = 500\ndiscount = price * (10 / 100)\nfinal_price = price - discount\nprint(final_price)'},
+  brief:'ลดราคา 20% แล้วคิด VAT 7% จากราคาหลังลด ระบบสร้างตัวแปร price ไว้ให้แล้ว (แต่ละ test ราคาไม่เท่ากัน) ให้แสดงราคาสุดท้าย',
+  goal:'ผลลัพธ์ตรงกับทุก test (ทศนิยมคลาดได้ไม่เกิน 0.01)',
+  api:['price','after_discount = ','print()'],
+  hints:['ราคาหลังลด 20% = <code>price - price * 20 / 100</code> หรือเขียนสั้นๆ ว่า <code>price * 0.8</code>','VAT 7% คิดจากราคาหลังลด: ราคาสุดท้าย = ราคาหลังลด + ราคาหลังลด × 7 / 100','แยกเป็นตัวแปรทีละขั้น เช่น <code>after_discount = ...</code> แล้วค่อย <code>final_price = ...</code> จะหาที่ผิดง่ายกว่า'],
+  starter:'# ระบบสร้างตัวแปร price ไว้ให้แล้ว\n# ลองลบ # หน้าบรรทัดล่างเพื่อดูค่า\n# print(price)\n',
+  parLines:4, tol:0.01,
+  mustNot:[literalAssign('price')],
+  tests:[{pre:'price = 500',expect:'428'},{pre:'price = 1200',expect:'1027.2'},{pre:'price = 99',expect:'84.744'}]},
+
+ {id:'types',ch:0,kind:'term',name:'แพ็กน็อตใส่กล่อง',concept:'ชนิดข้อมูล · // %',
+  story:'<b>ฝ่ายแพ็กของ:</b> น็อตมาเป็นกอง กล่องละ 12 ตัว ต้องใช้กล่องกี่ใบ เหลือเศษกี่ตัว?',
+  lesson:{html:`<p>ข้อมูลใน Python มีหลายชนิด ตรวจได้ด้วย <code>type()</code></p>
+<table><tr><th>ชนิด</th><th>ตัวอย่าง</th></tr><tr><td><code>int</code> จำนวนเต็ม</td><td><code>17</code></td></tr><tr><td><code>float</code> ทศนิยม</td><td><code>3.4</code></td></tr><tr><td><code>str</code> ข้อความ</td><td><code>"17"</code></td></tr><tr><td><code>bool</code> จริง/เท็จ</td><td><code>True</code> <code>False</code></td></tr></table>
+<p>operator เพิ่มเติม: <code>//</code> หารแล้วปัดเศษทิ้ง, <code>%</code> เศษจากการหาร (mod), <code>**</code> ยกกำลัง สังเกตว่า <code>/</code> ให้ผลเป็น float เสมอ</p>`,
+   example:'print(17 / 5)    # 3.4\nprint(17 // 5)   # 3  หารปัดเศษทิ้ง\nprint(17 % 5)    # 2  เศษ\nprint(2 ** 3)    # 8  ยกกำลัง\nprint(type(17), type(3.4), type("17"), type(True))'},
+  brief:'ระบบให้ตัวแปร bolts (จำนวนน็อตทั้งหมด) บรรทัดแรกแสดงจำนวนกล่องที่ใส่ได้เต็ม บรรทัดที่สองแสดงจำนวนน็อตที่เหลือ',
+  goal:'ผลลัพธ์ตรงกับทุก test',
+  api:['bolts // 12','bolts % 12','print()'],
+  hints:['<code>50 // 12</code> ได้ 4 คือใส่เต็มได้ 4 กล่อง','<code>50 % 12</code> ได้ 2 คือเหลือ 2 ตัว ใช้ตัวแปร bolts แทนเลข 50'],
+  starter:'# ระบบสร้างตัวแปร bolts ไว้ให้แล้ว\n',
+  parLines:2,
+  mustNot:[literalAssign('bolts')],
+  tests:[{pre:'bolts = 50',expect:'4\n2'},{pre:'bolts = 120',expect:'10\n0'},{pre:'bolts = 7',expect:'0\n7'}]},
+
+ {id:'input',ch:0,kind:'term',name:'ค่าเฉลี่ยคะแนนสอบ',concept:'input() · int()',
+  story:'<b>ครูประจำชั้น:</b> ฉันจะพิมพ์คะแนนสอบ 3 ครั้งให้ ช่วยคิดค่าเฉลี่ยที',
+  lesson:{html:`<p><code>input()</code> ใช้รับข้อมูลจากผู้ใช้ ข้อความในวงเล็บคือคำถามที่แสดงให้ผู้ใช้เห็น</p>
+<p><b>สำคัญ:</b> <code>input()</code> ให้ค่าเป็น <b>string เสมอ</b> ถึงผู้ใช้จะพิมพ์ 80 ก็ได้ <code>"80"</code> ถ้าจะเอาไปคำนวณต้องแปลงก่อนด้วย <code>int()</code> หรือ <code>float()</code></p>
+<p>ใน test ระบบจะป้อนค่าแทนคนพิมพ์ ค่าที่ป้อนจะแสดงเป็นสีน้ำเงินในช่อง Output</p>`,
+   example:'score_text = input("Score: ")\nprint(type(score_text))   # str\nscore = int(score_text)\nprint(score + 5)\nprint(round(81.6666, 2))  # ปัดทศนิยม 2 ตำแหน่ง',
+   exInputs:['80']},
+  brief:'รับคะแนนสอบ 3 ครั้งด้วย input() ทีละครั้ง แล้วแสดงค่าเฉลี่ย ปัดทศนิยม 2 ตำแหน่งด้วย round(ค่า, 2)',
+  goal:'ผลลัพธ์ตรงกับทุก test',
+  api:['int(input("Score: "))','round(x, 2)','print()'],
+  hints:['ถ้าไม่แปลงก่อน <code>"80" + "75"</code> จะได้ <code>"8075"</code> (ต่อข้อความ) ต้องใช้ <code>int(input())</code>','ค่าเฉลี่ย = <code>(a + b + c) / 3</code> ต้องใส่วงเล็บ เพราะ / ทำก่อน +','ข้อความคำถามใน input() ไม่ถูกนับเป็นผลลัพธ์ ใส่ได้ตามสบาย'],
+  starter:'a = int(input("Score 1: "))\n',
+  parLines:5, tol:0.005,
+  mustHave:[{re:/input\s*\(/,msg:'ต้องรับค่าด้วย input()'}],
+  tests:[{inputs:['80','75','90'],expect:'81.67'},{inputs:['100','100','99'],expect:'99.67'},{inputs:['50','60','70'],expect:'60'}]},
+
+ {id:'hello',ch:0,kind:'world',name:'ก้าวแรกของ Bolt',concept:'เรียกใช้ฟังก์ชัน',
+  story:'<b>หัวหน้าโรงงาน:</b> ได้เวลาให้ Bolt ลุกเดินแล้ว ธงเขียวคือจุดชาร์จแบต',
+  lesson:{html:`<p><code>print()</code> คือ<b>ฟังก์ชัน</b>: เรียกชื่อแล้วตามด้วยวงเล็บ หุ่น Bolt ก็มีฟังก์ชันของตัวเอง เช่น <code>move(East)</code> สั่งเดินไปทางขวา 1 ช่อง</p>
+<ul><li>ทิศมี 4 แบบ: <code>North</code> บน, <code>South</code> ล่าง, <code>East</code> ขวา, <code>West</code> ซ้าย ต้องขึ้นต้นตัวพิมพ์ใหญ่</li>
+<li>1 คำสั่ง = 1 ช่อง ถ้าชนกำแพงหุ่นจะไม่ขยับ</li></ul>`,
+   example:'move(East)\nmove(East)\nprint("เดินแล้ว 2 ช่อง")'},
+  brief:'Bolt (สี่เหลี่ยมสีส้ม) อยู่ซ้ายสุด ธงสีเขียวอยู่ห่างไป 4 ช่องทางขวา สั่งให้มันเดินไปยืนบนธง',
+  goal:'ยืนบนธงตอนโค้ดจบ',
+  api:['move(East)'],
+  hints:['<code>move(East)</code> เดินขวา 1 ช่อง ต้องการ 4 ช่องก็สั่ง 4 บรรทัด'],
+  starter:'move(East)\n',
+  parLines:4, par:()=>4,
+  build(){const W=makeWorld(5,1);at(W,4,0).t='goal';return W;}, check:onGoal},
+
+/* ===== บทที่ 2 ===== */
+ {id:'list',ch:1,kind:'term',name:'List เก็บหลายค่า',concept:'list · index · len()',
+  story:'<b>ฝ่ายบุคคล:</b> คะแนนประเมินพนักงานเยอะเกินจะสร้างตัวแปรทีละตัว ใช้ list ดีกว่า',
+  lesson:{html:`<p>ถ้ามีคะแนน 100 คน ไม่ควรสร้างตัวแปร 100 ตัว ให้รวมไว้ใน <b>list</b> ตัวเดียว: <code>scores = [80, 75, 90, 60]</code></p>
+<ul><li>ตำแหน่ง (index) เริ่มที่ <b>0</b> → <code>scores[0]</code> คือ 80</li>
+<li>index ติดลบนับจากท้าย → <code>scores[-1]</code> คือตัวสุดท้าย</li>
+<li><code>scores[1] = 85</code> แก้ค่า · <code>scores.append(95)</code> เพิ่มต่อท้าย · <code>len(scores)</code> นับจำนวน</li></ul>`,
+   example:'scores = [80, 75, 90, 60]\nprint(scores[0])\nprint(scores[-1])\nscores.append(95)\nprint(scores)\nprint(len(scores))'},
+  brief:'ระบบให้ list ชื่อ scores ให้แสดง 3 บรรทัด: คะแนนตัวแรก, คะแนนตัวสุดท้าย, และจำนวนคะแนนทั้งหมด',
+  goal:'ผลลัพธ์ตรงกับทุก test (list แต่ละ test ยาวไม่เท่ากัน)',
+  api:['scores[0]','scores[-1]','len(scores)','print()'],
+  hints:['ตัวแรกคือ index 0 ไม่ใช่ 1','ตัวสุดท้ายใช้ <code>scores[-1]</code> ได้ตัวสุดท้ายเสมอไม่ว่า list จะยาวแค่ไหน'],
+  starter:'# ระบบสร้าง list ชื่อ scores ไว้ให้แล้ว\n',
+  parLines:3,
+  mustNot:[literalAssign('scores')],
+  tests:[{pre:'scores = [80, 75, 90, 60]',expect:'80\n60\n4'},{pre:'scores = [55]',expect:'55\n55\n1'},{pre:'scores = [12, 40, 33, 18, 50, 7, 29]',expect:'12\n29\n7'}]},
+
+ {id:'grade',ch:1,kind:'term',name:'ตัดเกรด',concept:'if · elif · else',
+  story:'<b>ครูประจำชั้น:</b> ตัดเกรดมือไม่ไหวแล้ว ให้ Bolt ตัดให้ที',
+  lesson:{html:`<p><b>if</b> ทำให้โปรแกรมเลือกทางตามเงื่อนไข เงื่อนไขใช้ตัวเปรียบเทียบ <code>== != &gt; &lt; &gt;= &lt;=</code> ได้ผลเป็น True/False</p>
+<ul><li>ท้าย <code>if</code> <code>elif</code> <code>else</code> ต้องมี <code>:</code> และบรรทัดข้างในต้องย่อหน้า 4 ช่อง</li>
+<li>Python ตรวจจากบนลงล่าง เจอเงื่อนไขแรกที่ True ก็ทำแล้ว<b>ข้ามที่เหลือทั้งหมด</b> ลำดับจึงสำคัญ</li>
+<li>เชื่อมเงื่อนไขด้วย <code>and</code> (จริงทั้งคู่) <code>or</code> (จริงอย่างน้อยหนึ่ง) <code>not</code> (กลับค่า)</li></ul>`,
+   example:'score = 85\nif score >= 50:\n    print("Pass")       # ทำอันนี้แล้วหยุด\nelif score >= 80:\n    print("Excellent")  # ไม่มีวันมาถึง! ลำดับผิด\nelse:\n    print("Fail")'},
+  brief:'รับคะแนนด้วย input() แล้วแสดงเกรด: 80 ขึ้นไป A, 70–79 B, 60–69 C, 50–59 D, ต่ำกว่า 50 F (แสดงแค่ตัวอักษรเกรด)',
+  goal:'ผ่านทุก test รวมถึงคะแนนตรงขอบ เช่น 80 และ 49',
+  api:['if score >= 80:','elif score >= 70:','else:','print("A")'],
+  hints:['เรียงจากคะแนนสูงไปต่ำ: <code>if score &gt;= 80</code> ก่อน แล้วค่อย <code>elif score &gt;= 70</code>','อย่าลืมแปลง input เป็นตัวเลข: <code>score = int(input())</code>','เรียงจากสูงไปต่ำแล้ว ไม่ต้องเขียน <code>score &lt;= 79</code> เพราะถ้าถึง 80 จะเข้า if แรกไปแล้ว'],
+  starter:'score = int(input("Score: "))\n',
+  parLines:11,
+  tests:[{inputs:['85'],expect:'A'},{inputs:['80'],expect:'A'},{inputs:['79'],expect:'B'},{inputs:['65'],expect:'C'},{inputs:['50'],expect:'D'},{inputs:['49'],expect:'F'}]},
+
+ {id:'corridor',ch:1,kind:'world',name:'ทางเดินยาว',concept:'for · range()',
+  story:'<b>หัวหน้าโกดัง:</b> ทางเดินยาว 15 ช่อง ถ้าสั่งทีละบรรทัดคงเหนื่อย',
+  lesson:{html:`<p><b>for loop</b> ใช้ทำคำสั่งเดิมซ้ำ ไม่ต้องพิมพ์ซ้ำหลายบรรทัด</p>
+<ul><li><code>range(5)</code> ให้เลข 0, 1, 2, 3, 4 (ไม่รวม 5) → loop จึงวน 5 รอบ</li>
+<li>บรรทัดที่อยู่ใน loop ต้องย่อหน้า 4 ช่อง Python ใช้การย่อหน้าบอกว่าอะไรอยู่ใน loop</li></ul>`,
+   example:'for i in range(3):\n    print("Hello", i)\nprint("จบ loop")   # ไม่ย่อหน้า = อยู่นอก loop'},
+  brief:'ทางยาว 15 ช่อง จะพิมพ์ move(East) 15 บรรทัดก็ผ่าน แต่ดาวดวงที่สองต้องเขียนโค้ดไม่เกิน 2 บรรทัด',
+  goal:'ยืนบนธงตอนโค้ดจบ',
+  api:['for i in range(15):','move(East)'],
+  hints:['<code>for i in range(15):</code> แล้วบรรทัดถัดไปย่อหน้า <code>move(East)</code>'],
+  starter:'',
+  parLines:2, par:()=>15,
+  build(){const W=makeWorld(16,1);at(W,15,0).t='goal';return W;}, check:onGoal},
+
+ {id:'stairs',ch:1,kind:'world',name:'บันไดเลื่อนเสีย',concept:'loop ที่มีหลายคำสั่ง',
+  story:'<b>หัวหน้าโกดัง:</b> บันไดเลื่อนเสีย Bolt ต้องเดินขึ้นเองทีละขั้น',
+  lesson:{html:`<p>ใน loop ใส่ได้หลายบรรทัด ทุกบรรทัดที่ย่อหน้าเท่ากันใต้ for จะถูกทำซ้ำด้วยกันเป็นชุด</p>
+<p>เทคนิค: ก่อนเขียนโค้ด ให้หา<b>รูปแบบที่ซ้ำ (pattern)</b> ให้เจอก่อน</p>`,
+   example:'for i in range(2):\n    print("ขวา")\n    print("บน")'},
+  brief:'ทางขึ้นบันไดต้องเดินขวาหนึ่ง ขึ้นบนหนึ่ง สลับกันไปจนถึงยอด',
+  goal:'ยืนบนธงตอนโค้ดจบ',
+  api:['for i in range(6):','move(East)','move(North)'],
+  hints:['pattern คือ ขวา-บน ซ้ำกี่รอบ? นับจากรูปดู'],
+  starter:'',
+  parLines:3, par:()=>12,
+  build(){const W=makeWorld(7,7,'wall');for(let i=0;i<7;i++){at(W,i,i).t='empty';if(i<6)at(W,i+1,i).t='empty';}at(W,6,6).t='goal';return W;},
+  check:onGoal},
+
+ {id:'coins',ch:1,kind:'world',name:'เก็บเหรียญตกหล่น',concept:'if ใน loop',
+  story:'<b>แม่บ้าน:</b> พนักงานทำเหรียญหล่นเต็มทางเดิน เก็บให้หมดนะ แต่อย่าก้มเก็บช่องที่ไม่มีเหรียญ',
+  lesson:{html:`<p>เอา <b>if</b> ใส่ไว้ใน <b>loop</b> ได้ เพื่อให้ตัดสินใจใหม่ทุกรอบ</p>
+<ul><li><code>get_tile()</code> บอกว่าใต้หุ่นมีอะไร เป็น string เช่น <code>"coin"</code> หรือ <code>"empty"</code></li>
+<li>ระวัง: <code>==</code> คือเปรียบเทียบ ส่วน <code>=</code> คือกำหนดค่า</li></ul>`,
+   example:'for i in range(3):\n    print("ช่องที่", i, "มี", get_tile())\n    move(East)'},
+  brief:'เหรียญวางสุ่มตำแหน่งใหม่ทุกครั้งที่กด Run เดินให้สุดทาง แล้วใช้ take() เก็บเฉพาะช่องที่มีเหรียญ',
+  goal:'เก็บเหรียญให้ครบทุกเหรียญ',
+  api:['for i in range(12):','if get_tile() == "coin":','take()','move(East)'],
+  hints:['ใน loop ให้เช็คก่อนเดิน: <code>if get_tile() == "coin":</code> แล้วค่อย <code>take()</code>','ทางยาว 12 ช่อง นับดีๆ ว่าต้องวนกี่รอบถึงจะเช็คครบทุกช่อง รวมช่องสุดท้าย'],
+  starter:'',
+  parLines:4, par:W=>W.w+W.totalCoins,
+  build(r){const W=makeWorld(12,1);let n=0;
+    while(n<3){n=0;for(let x=1;x<12;x++){const c=r()<0.45;at(W,x,0).t=c?'coin':'empty';if(c)n++;}}
+    W.totalCoins=n;return W;}, check:allCoins},
+
+ {id:'passed',ch:1,kind:'term',name:'นับคนสอบผ่าน',concept:'for กับ list · accumulator',
+  story:'<b>ครูประจำชั้น:</b> ห้องนี้มีกี่คนที่สอบผ่าน แล้วคะแนนรวมทั้งห้องเท่าไหร่?',
+  lesson:{html:`<p><code>for score in scores:</code> หยิบสมาชิกใน list ออกมาทีละตัวเก็บในตัวแปร score</p>
+<p><b>Accumulator</b> คือตัวแปรที่สะสมค่าทีละรอบ: ตั้งเป็น 0 ก่อน loop แล้วบวกเพิ่มใน loop (<code>total += score</code> คือ <code>total = total + score</code>)</p>
+<table><tr><th>รอบ</th><th>score</th><th>total</th></tr><tr><td>เริ่ม</td><td>–</td><td>0</td></tr><tr><td>1</td><td>80</td><td>80</td></tr><tr><td>2</td><td>75</td><td>155</td></tr><tr><td>3</td><td>90</td><td>245</td></tr></table>`,
+   example:'scores = [80, 75, 90]\ntotal = 0\nfor score in scores:\n    total += score\n    print("ตอนนี้ total =", total)\nprint("Total =", total)'},
+  brief:'ระบบให้ list ชื่อ scores บรรทัดแรกแสดงจำนวนคนที่ได้ 50 ขึ้นไป บรรทัดที่สองแสดงผลรวมคะแนนทั้งหมด เขียนด้วย for loop เอง',
+  goal:'ผลลัพธ์ตรงกับทุก test',
+  api:['passed = 0','total = 0','for score in scores:','total += score'],
+  hints:['ต้องมี accumulator 2 ตัว: <code>passed = 0</code> และ <code>total = 0</code> สร้างไว้ก่อน loop','ใน loop: บวก total ทุกรอบ แต่บวก passed เฉพาะตอน <code>score &gt;= 50</code>','print ทั้งสองค่าหลังจบ loop (ไม่ย่อหน้า) ไม่งั้นจะ print ทุกรอบ'],
+  starter:'',
+  parLines:8,
+  mustNot:[{re:/\bsum\s*\(/,msg:'ด่านนี้ให้ฝึกเขียน accumulator เองด้วย for loop (ยังไม่ใช้ sum())'},literalAssign('scores')],
+  tests:[{pre:'scores = [80, 45, 70, 90]',expect:'3\n285'},{pre:'scores = [10, 20, 30]',expect:'0\n60'},{pre:'scores = [50, 49, 100, 50, 0]',expect:'3\n249'}]},
+
+ {id:'warehouse',ch:1,kind:'world',name:'ชั่งน้ำหนักกล่อง',concept:'list + append() กับหุ่น',
+  story:'<b>หัวหน้าโกดัง:</b> ลังสินค้ามาใหม่ 8 ใบ ชั่งให้ครบแล้วรายงานน้ำหนักรวมกับลังที่หนักที่สุด',
+  lesson:{html:`<p>สร้าง list ว่าง <code>[]</code> ไว้ก่อน แล้วค่อยเติมค่าด้วย <code>.append()</code> ระหว่างทาง เป็นวิธีเก็บข้อมูลที่หุ่นเก็บมาได้</p>
+<ul><li><code>measure()</code> บอกน้ำหนักของลังที่หุ่นยืนอยู่</li>
+<li><code>sum(list)</code> ผลรวม · <code>max(list)</code> ค่ามากสุด · <code>min(list)</code> ค่าน้อยสุด</li></ul>`,
+   example:'found = []\nfor i in range(3):\n    found.append(measure())\n    move(East)\nprint(found)\nprint("มากสุด", max(found))'},
+  brief:'เดินผ่านลังทั้ง 8 ใบ อ่านน้ำหนักด้วย measure() เก็บไว้ใน list แล้วแสดง 2 บรรทัด: น้ำหนักรวม และน้ำหนักลังที่หนักที่สุด',
+  goal:'ผลที่ print ตรงกับน้ำหนักจริง (สุ่มใหม่ทุกครั้ง)',
+  api:['weights = []','weights.append(measure())','sum(weights)','max(weights)'],
+  hints:['loop 8 รอบ: ในแต่ละรอบ append น้ำหนักก่อน แล้วค่อย move(East)','หลังจบ loop ค่อย print(sum(weights)) และ print(max(weights))'],
+  starter:'weights = []\n',
+  parLines:6, par:()=>8,
+  build(r){const W=makeWorld(8,1);for(let x=0;x<8;x++){at(W,x,0).t='crate';at(W,x,0).v=ri(r,2,40);}return W;},
+  check:(W,printed)=>{const v=[];for(let x=0;x<W.w;x++)v.push(at(W,x,0).v);const s=v.reduce((a,b)=>a+b,0),m=Math.max(...v);
+    const c=compareLines(normLines(printed),[String(s),String(m)]);
+    return c.ok?{ok:true,msg:`รวม ${s} · หนักสุด ${m}`}:{ok:false,msg:`ต้อง print ${s} และ ${m} (น้ำหนักลัง: ${v.join(', ')}) — ${c.why}`};}},
+
+ {id:'unknown',ch:1,kind:'world',name:'ทางที่ไม่รู้ความยาว',concept:'while loop',
+  story:'<b>หัวหน้าโกดัง:</b> โกดังขยายทุกวัน ทางเดินยาวไม่เท่าเดิม นับล่วงหน้าไม่ได้',
+  lesson:{html:`<p><b>while</b> ทำซ้ำตราบที่เงื่อนไขยังเป็น True เหมาะกับงานที่ไม่รู้ล่วงหน้าว่าต้องวนกี่รอบ</p>
+<ul><li><code>for</code>: รู้จำนวนรอบ / วนผ่านข้อมูล · <code>while</code>: วนจนเงื่อนไขเป็น False</li>
+<li>ระวัง <b>infinite loop</b>: ถ้าในลูปไม่มีอะไรทำให้เงื่อนไขเปลี่ยน โปรแกรมจะวนไม่จบ</li>
+<li><code>can_move(East)</code> ตอบ True ถ้าข้างหน้าเดินได้</li></ul>`,
+   example:'count = 0\nwhile count <= 3:\n    print(count)\n    count += 1      # ถ้าลืมบรรทัดนี้ = infinite loop'},
+  brief:'ความยาวทางสุ่มใหม่ทุกครั้ง ทางเดินไปขวาก่อน แล้วเลี้ยวขึ้นบนไปหาธง',
+  goal:'ยืนบนธงตอนโค้ดจบ (ต้องผ่านได้ทุกครั้งที่ Run)',
+  api:['while can_move(East):','move(East)','move(North)'],
+  hints:['<code>while can_move(East):</code> แล้วข้างในสั่ง <code>move(East)</code>','ทำแบบเดียวกันอีกรอบสำหรับทิศ North','กด Run หลายๆ ครั้ง ถ้าผ่านทุกครั้งแปลว่าโค้ดใช้ได้จริง'],
+  starter:'',
+  parLines:4, par:W=>W.meta.a+W.meta.b,
+  build(r){const a=ri(r,5,13),b=ri(r,3,8);const W=makeWorld(a+1,b+1,'wall');
+    for(let x=0;x<=a;x++)at(W,x,0).t='empty';for(let y=0;y<=b;y++)at(W,a,y).t='empty';at(W,a,b).t='goal';W.meta={a,b};return W;},
+  check:onGoal},
+
+ {id:'arrows',ch:1,kind:'world',name:'ตามป้ายลูกศร',concept:'while + if/elif',
+  story:'<b>ช่างซ่อม:</b> ฉันติดป้ายบอกทางไว้บนพื้นแล้ว อ่านทีละป้ายแล้วเดินตามไปถึงห้องเครื่องได้เลย',
+  lesson:{html:`<p>รวม while กับ if/elif: วนอ่านข้อมูลใหม่ทุกรอบ แล้วตัดสินใจตามค่าที่อ่านได้</p>
+<ul><li><code>read_sign()</code> อ่านป้ายใต้หุ่น ได้ตัวอักษร <code>"U"</code> ขึ้น, <code>"D"</code> ลง, <code>"L"</code> ซ้าย, <code>"R"</code> ขวา</li>
+<li><code>get_tile()</code> เป็น <code>"goal"</code> เมื่อถึงธงแล้ว</li></ul>`,
+   example:'sign = read_sign()\nprint("ป้ายแรกบอกว่า", sign)\nif sign == "U":\n    print("ต้องขึ้นบน")\nelif sign == "R":\n    print("ต้องไปขวา")\nelse:\n    print("ทางอื่น")'},
+  brief:'ป้ายลูกศรวางเป็นเส้นทางคดเคี้ยว สุ่มใหม่ทุกครั้ง ให้ Bolt อ่านป้ายแล้วเดินตามจนถึงธง',
+  goal:'ยืนบนธงตอนโค้ดจบ (ต้องผ่านได้ทุกครั้งที่ Run)',
+  api:['while get_tile() != "goal":','s = read_sign()','if s == "U":','elif s == "D":','move(North)'],
+  hints:['โครงคือ <code>while get_tile() != "goal":</code> แล้วข้างในอ่านป้ายใส่ตัวแปรก่อน <code>s = read_sign()</code>','ใช้ if/elif 4 กรณี: U → North, D → South, L → West, R → East','ลองนับบรรทัด แล้วรอดูด่าน "ถอดรหัสเส้นทาง" ในบทที่ 3 ว่าเขียนให้สั้นกว่านี้ได้ยังไง'],
+  starter:'',
+  parLines:11, par:W=>W.meta.d,
+  build(r){const W=makeWorld(9,9);const{path,steps}=randomPath(r,9,13,19);
+    steps.forEach((s,i)=>{const[x,y]=path[i];at(W,x,y).t='sign';at(W,x,y).v=s;});
+    const[gx,gy]=path[path.length-1];at(W,gx,gy).t='goal';W.meta={d:steps.length};return W;},
+  check:onGoal},
+
+/* ===== บทที่ 3 ===== */
+ {id:'set',ch:2,kind:'term',name:'ผู้เข้าชมไม่ซ้ำ',concept:'set · in',
+  story:'<b>ยามหน้าประตู:</b> สมุดลงชื่อมีชื่อซ้ำเต็มเลย วันนี้มีคนมาจริงๆ กี่คน แล้ว Mali มาไหม?',
+  lesson:{html:`<p>โครงสร้างข้อมูล 4 แบบหลัก: <b>List</b> มีลำดับ แก้ได้ · <b>Tuple</b> มีลำดับ แก้ไม่ได้ · <b>Set</b> ไม่มีลำดับ สมาชิกไม่ซ้ำ · <b>Dictionary</b> แบบ key-value</p>
+<ul><li><code>set(list)</code> แปลง list เป็น set ค่าซ้ำจะหายไปเอง</li>
+<li><code>x in ข้อมูล</code> ตรวจว่ามีสมาชิกนั้นไหม ได้ True/False</li>
+<li>set operation: <code>A | B</code> union, <code>A &amp; B</code> intersection, <code>A - B</code> difference</li></ul>`,
+   example:'tags = ["a", "b", "a", "c", "b"]\nu = set(tags)\nprint(u)          # ลำดับอาจไม่เหมือนเดิม\nprint(len(u))\nprint("a" in u, "z" in u)\nprint({1, 2, 3} & {3, 4})'},
+  brief:'ระบบให้ list ชื่อ visitors (มีชื่อซ้ำ) บรรทัดแรกแสดงจำนวนคนที่ไม่ซ้ำกัน บรรทัดที่สองแสดงว่า Mali เคยมาไหม (True หรือ False)',
+  goal:'ผลลัพธ์ตรงกับทุก test',
+  api:['set(visitors)','len()','"Mali" in visitors'],
+  hints:['<code>len(set(visitors))</code> นับคนไม่ซ้ำ','<code>print("Mali" in visitors)</code> ได้ True/False เลย ไม่ต้องใช้ if'],
+  starter:'# ระบบสร้าง list ชื่อ visitors ไว้ให้แล้ว\n',
+  parLines:2,
+  mustNot:[literalAssign('visitors')],
+  tests:[{pre:'visitors = ["Mali", "Ton", "Mali", "Ploy", "Ton"]',expect:'3\nTrue'},{pre:'visitors = ["Ton", "Ton"]',expect:'1\nFalse'},{pre:'visitors = ["A", "B", "C", "Mali"]',expect:'4\nTrue'}]},
+
+ {id:'dict',ch:2,kind:'term',name:'คิดเงินตะกร้า',concept:'dictionary · get()',
+  story:'<b>แคชเชียร์:</b> ลูกค้าหยิบของมาจ่าย บางชิ้นไม่ใช่ของร้านเราด้วย คิดเงินให้ถูกนะ',
+  lesson:{html:`<p><b>Dictionary</b> เก็บข้อมูลเป็นคู่ <b>key → value</b> แทนการใช้ตำแหน่งแบบ list</p>
+<ul><li>อ่านด้วย key: <code>prices["gear"]</code> ถ้าไม่มี key จะเกิด <code>KeyError</code></li>
+<li><code>prices.get("laser", 0)</code> อ่านแบบปลอดภัย ถ้าไม่มี key ได้ค่าสำรอง (0) แทน</li>
+<li>แก้/เพิ่มค่า: <code>prices["gear"] = 25</code> · ดูทั้งหมด: <code>.keys()</code> <code>.values()</code> <code>.items()</code></li></ul>`,
+   example:'student = {"name": "Mali", "score": 85}\nprint(student["name"])\nstudent["grade"] = "A"\nprint(student.get("age", "ไม่มีข้อมูล"))\nfor key, value in student.items():\n    print(key, "→", value)'},
+  brief:'ระบบให้ dictionary ชื่อ prices (ราคาอะไหล่) และ list ชื่อ cart (ของในตะกร้า ซื้อซ้ำได้) ให้แสดงราคารวม ของที่ไม่มีใน prices นับเป็น 0',
+  goal:'ผลลัพธ์ตรงกับทุก test รวมถึงตะกร้าที่มีของไม่อยู่ในร้าน',
+  api:['total = 0','for item in cart:','prices.get(item, 0)'],
+  hints:['ใช้ accumulator: <code>total = 0</code> แล้ว loop <code>for item in cart:</code>','ถ้าใช้ <code>prices[item]</code> test ที่มี "laser" จะเจอ KeyError ลองเปลี่ยนเป็น <code>.get()</code>'],
+  starter:'# ระบบสร้าง prices และ cart ไว้ให้แล้ว\n',
+  parLines:4,
+  mustNot:[literalAssign('prices'),literalAssign('cart')],
+  tests:[{pre:'prices = {"bolt": 5, "gear": 20, "chip": 150}\ncart = ["gear", "bolt", "bolt", "chip"]',expect:'180'},
+         {pre:'prices = {"bolt": 5, "gear": 20, "chip": 150}\ncart = ["chip", "laser", "gear"]',expect:'170'},
+         {pre:'prices = {"bolt": 5}\ncart = []',expect:'0'}]},
+
+ {id:'decoder',ch:2,kind:'world',name:'ถอดรหัสเส้นทาง',concept:'dictionary + loop ผ่าน string',
+  story:'<b>หน่วยข่าวกรอง:</b> ได้รหัสเส้นทางลับในเขาวงกตมาเป็นสัญลักษณ์ลูกศร แปลแล้วเดินตามให้ไว',
+  lesson:{html:`<p>dictionary ใช้<b>แปลค่า</b>ได้ดีมาก แทน if/elif ยาวๆ ด้วยการเปิดตาราง</p>
+<ul><li>string วนด้วย for ได้ทีละตัวอักษร: <code>for c in "abc":</code></li>
+<li>value ใน dictionary เป็นอะไรก็ได้ รวมถึงทิศ <code>North</code> ด้วย</li></ul>`,
+   example:'meaning = {"a": "แอปเปิล", "b": "บอล"}\nfor c in "abba":\n    print(c, "→", meaning[c])'},
+  brief:'ระบบให้ตัวแปร route เป็น string ของลูกศร > ขวา, < ซ้าย, ^ ขึ้น, v ลง ให้สร้าง dictionary แปลสัญลักษณ์เป็นทิศ แล้วเดินตามรหัสจนถึงธง',
+  goal:'ยืนบนธง และใช้ dictionary แปลรหัส (ต้องผ่านได้ทุกครั้งที่ Run)',
+  api:['to_dir = {">": East, "<": West, "^": North, "v": South}','for c in route:','move(to_dir[c])'],
+  hints:['สร้าง dict 4 คู่: สัญลักษณ์ → ทิศ','loop <code>for c in route:</code> แล้วเรียก <code>move(to_dir[c])</code> ทั้งด่านเหลือแค่ 3 บรรทัด เทียบกับด่านป้ายลูกศรดู'],
+  starter:'# ระบบสร้างตัวแปร route ไว้ให้แล้ว\nprint(route)\n',
+  parLines:3, par:W=>W.meta.d,
+  mustHave:[{re:/\{/,msg:'ลองใช้ dictionary แปลสัญลักษณ์แทน if/elif'}],
+  build(r){const W=makeWorld(8,8,'wall');const{path,steps}=randomPath(r,8,14,20);
+    path.forEach(([x,y])=>at(W,x,y).t='empty');const[gx,gy]=path[path.length-1];at(W,gx,gy).t='goal';
+    const sym={U:'^',D:'v',L:'<',R:'>'};W.meta={d:steps.length};W.pre=`route = "${steps.map(s=>sym[s]).join('')}"`;return W;},
+  check:onGoal},
+
+ {id:'tuple',ch:2,kind:'term',name:'ประกาศรายชื่อคนผ่าน',concept:'tuple · unpacking',
+  story:'<b>ครูประจำชั้น:</b> ข้อมูลมาเป็นคู่ (ชื่อ, คะแนน) ช่วยประกาศชื่อเฉพาะคนที่ผ่าน',
+  lesson:{html:`<p><b>Tuple</b> เหมือน list แต่ใช้วงเล็บ <code>( )</code> และ<b>แก้ค่าข้างในไม่ได้</b> เหมาะกับข้อมูลที่มาเป็นชุดและไม่ควรเปลี่ยน เช่นพิกัด <code>(13.7, 100.5)</code></p>
+<ul><li>อ่านค่าด้วย index: <code>p[0]</code></li>
+<li><b>Unpacking</b>: <code>name, score = ("Mali", 85)</code> แยกเป็น 2 ตัวแปรในบรรทัดเดียว ใช้ใน for ได้</li>
+<li>tuple สมาชิกตัวเดียวต้องมี , เช่น <code>(10,)</code></li></ul>`,
+   example:'p = ("Mali", 85)\nprint(p[0], p[1])\nname, score = p\nprint(name, score)\nfor name, score in [("A", 1), ("B", 2)]:\n    print(name, "ได้", score)'},
+  brief:'ระบบให้ records เป็น list ของ tuple (ชื่อ, คะแนน) ให้แสดงชื่อคนที่ได้ 50 ขึ้นไป บรรทัดละคน ตามลำดับเดิม (ถ้าไม่มีใครผ่านก็ไม่ต้องแสดงอะไร)',
+  goal:'ผลลัพธ์ตรงกับทุก test',
+  api:['for name, score in records:','if score >= 50:','print(name)'],
+  hints:['<code>for name, score in records:</code> แยกชื่อกับคะแนนให้อัตโนมัติ','ใน loop ใช้ <code>if score &gt;= 50:</code> แล้ว <code>print(name)</code>'],
+  starter:'# ระบบสร้าง records ไว้ให้แล้ว\n',
+  parLines:3,
+  mustNot:[literalAssign('records')],
+  tests:[{pre:'records = [("Mali", 85), ("Ton", 42), ("Ploy", 50)]',expect:'Mali\nPloy'},{pre:'records = [("A", 49)]',expect:''},{pre:'records = [("Kim", 100), ("Lee", 0), ("Nok", 77)]',expect:'Kim\nNok'}]},
+
+/* ===== บทที่ 4 ===== */
+ {id:'fstring',ch:3,kind:'term',name:'ใบรายงานคะแนน',concept:'f-string',
+  story:'<b>ฝ่ายทะเบียน:</b> ทำใบรายงานคะแนนให้เป็นประโยคสวยๆ หน่อย',
+  lesson:{html:`<p><b>f-string</b> ใช้ผสมข้อความกับค่าตัวแปร: ใส่ <code>f</code> หน้าเครื่องหมายคำพูด แล้วใส่ตัวแปรใน <code>{ }</code></p>
+<p>ข้อดีคือคุมเว้นวรรคและเครื่องหมายได้เป๊ะ ต่างจาก print แบบใช้ , ที่เว้นวรรคให้อัตโนมัติ</p>`,
+   example:'name = "Mali"\nscore = 85\nprint(name, "scored", score)\nprint(f"{name} scored {score} points.")\nprint(f"ราคา {score * 2} บาท")   # คำนวณใน { } ได้'},
+  brief:'รับชื่อแล้วรับคะแนนด้วย input() (ตามลำดับนี้) แล้วแสดงข้อความแบบนี้ให้ตรงทุกตัวอักษร: Mali scored 85 points.',
+  goal:'ผลลัพธ์ตรงกับทุก test (จุดท้ายประโยคก็ต้องมี)',
+  api:['name = input("Name: ")','print(f"{name} scored {score} points.")'],
+  hints:['<code>name = input("Name: ")</code> แล้วรับคะแนนอีกบรรทัด','<code>print(f"{name} scored {score} points.")</code>'],
+  starter:'',
+  parLines:3,
+  mustHave:[{re:/\bf["']/,msg:'ลองใช้ f-string ในการแสดงผล'}],
+  tests:[{inputs:['Mali','85'],expect:'Mali scored 85 points.'},{inputs:['Somchai','72'],expect:'Somchai scored 72 points.'}]},
+
+ {id:'func',ch:3,kind:'term',name:'ฟังก์ชันคิด VAT',concept:'def · return',
+  story:'<b>ฝ่ายบัญชี:</b> ต้องคิด VAT วันละเป็นร้อยครั้ง เขียนเป็นฟังก์ชันไว้เรียกใช้ซ้ำเถอะ',
+  lesson:{html:`<p><b>Function</b> คือการตั้งชื่อให้ชุดคำสั่ง แล้วเรียกใช้ซ้ำได้กี่ครั้งก็ได้</p>
+<ul><li><code>def ชื่อ(parameter):</code> สร้างฟังก์ชัน บรรทัดข้างในต้องย่อหน้า</li>
+<li><b>parameter</b> คือตัวแปรที่รอรับค่า · <b>argument</b> คือค่าจริงที่ส่งเข้าไปตอนเรียก</li>
+<li><code>return</code> ส่งผลลัพธ์กลับไปให้คนที่เรียก ส่วน <code>print</code> แค่แสดงบนจอ ฟังก์ชันที่ไม่มี return จะคืนค่า <code>None</code></li></ul>`,
+   example:'def add(a, b):\n    return a + b\n\ndef add_print(a, b):\n    print(a + b)\n\ntotal = add(50, 3)\nprint(total)        # 53\nx = add_print(2, 3) # แสดง 5\nprint(x)            # None เพราะไม่มี return'},
+  brief:'สร้างฟังก์ชัน add_vat(price) ที่ return ราคารวม VAT 7% ระบบจะเรียกฟังก์ชันของคุณเองด้วยราคาต่างๆ ไม่ต้องใช้ input() หรือ print',
+  goal:'ฟังก์ชันคืนค่าถูกทุก test',
+  api:['def add_vat(price):','return price * 1.07'],
+  hints:['<code>def add_vat(price):</code> แล้วบรรทัดถัดไปย่อหน้า','ใช้ <code>return</code> ไม่ใช่ print'],
+  starter:'',
+  parLines:2, tol:0.001,
+  tests:[{calls:['add_vat(100)'],expectCalls:['107']},{calls:['add_vat(0)'],expectCalls:['0']},{calls:['add_vat(250)'],expectCalls:['267.5']}]},
+
+ {id:'gradefn',ch:3,kind:'term',name:'ฟังก์ชันตัดเกรด',concept:'process → function',
+  story:'<b>ครูประจำชั้น:</b> โปรแกรมตัดเกรดดีมาก แต่ฉันอยากเรียกใช้จากที่อื่นด้วย',
+  lesson:{html:`<p>โค้ดที่เคยเขียนแล้ว ย้ายเข้าไปในฟังก์ชันได้ เพื่อเรียกใช้ซ้ำกับค่าใหม่เรื่อยๆ</p>
+<p>วิธีย้าย: ค่าที่เคยรับจาก <code>input()</code> → กลายเป็น <b>parameter</b> และที่เคย <code>print</code> → เปลี่ยนเป็น <b>return</b> (return แล้วฟังก์ชันจบทันที)</p>`,
+   example:'def is_pass(score):\n    if score >= 50:\n        return "Pass"\n    return "Fail"\n\nprint(is_pass(70))\nprint(is_pass(20))'},
+  brief:'สร้างฟังก์ชัน grade(score) ที่ return เกรดเป็นข้อความ "A" "B" "C" "D" หรือ "F" ตามเกณฑ์เดียวกับด่านตัดเกรด',
+  goal:'ฟังก์ชันคืนค่าถูกทุก test',
+  api:['def grade(score):','if score >= 80:','return "A"'],
+  hints:['ก๊อปโค้ดด่านตัดเกรดมา ลบบรรทัด input() ออก แล้วเปลี่ยน print("A") เป็น return "A"','อย่าลืมย่อหน้า if ทั้งชุดให้อยู่ในฟังก์ชัน'],
+  starter:'',
+  parLines:10,
+  mustNot:[{re:/input\s*\(/,msg:'ฟังก์ชันรับคะแนนผ่าน parameter แล้ว ไม่ต้องใช้ input()'}],
+  tests:[{calls:['grade(85)'],expectCalls:["'A'"]},{calls:['grade(72)'],expectCalls:["'B'"]},{calls:['grade(61)'],expectCalls:["'C'"]},{calls:['grade(50)'],expectCalls:["'D'"]},{calls:['grade(10)'],expectCalls:["'F'"]}]},
+
+ {id:'try',ch:3,kind:'term',name:'กันโปรแกรมพัง',concept:'try · except',
+  story:'<b>ฝ่าย IT:</b> ผู้ใช้ชอบพิมพ์มั่ว พิมพ์ "abc" ทีไรโปรแกรมพังทุกที',
+  lesson:{html:`<p>บางครั้งโค้ดเกิด error ระหว่างรัน เช่น <code>int("abc")</code> ได้ <code>ValueError</code> หรือ <code>10 / 0</code> ได้ <code>ZeroDivisionError</code> แล้วโปรแกรมหยุดทันที</p>
+<p><code>try</code> / <code>except</code> ช่วยรับมือ: ลองทำใน try ก่อน ถ้าเกิด error ชนิดที่ระบุจะกระโดดไปทำใน except แทนการพัง (<code>finally</code> ทำเสมอไม่ว่าจะ error หรือไม่)</p>`,
+   example:'try:\n    x = int("abc")\n    print("ไม่ถึงบรรทัดนี้")\nexcept ValueError:\n    print("แปลงเป็นตัวเลขไม่ได้")\nfinally:\n    print("Finish")'},
+  brief:'รับคะแนนด้วย input() ถ้าแปลงเป็นจำนวนเต็มได้ ให้แสดง Your score is: ตามด้วยคะแนน ถ้าแปลงไม่ได้ให้แสดง Please enter an integer number.',
+  goal:'ผ่านทุก test โปรแกรมต้องไม่พังแม้ผู้ใช้พิมพ์ข้อความ',
+  api:['try:','score = int(input())','except ValueError:'],
+  hints:['ใส่ <code>score = int(input())</code> ไว้ใน try','ถ้า int() พัง Python จะข้ามไปที่ <code>except ValueError:</code> ทันที บรรทัดที่เหลือใน try จะไม่ถูกทำ'],
+  starter:'',
+  parLines:5,
+  mustHave:[{re:/\btry\s*:/,msg:'ใช้ try / except ในการจัดการ error'}],
+  tests:[{inputs:['80'],expect:'Your score is: 80'},{inputs:['abc'],expect:'Please enter an integer number.'},{inputs:['12.5'],expect:'Please enter an integer number.'},{inputs:['-3'],expect:'Your score is: -3'}]},
+
+ {id:'delivery',ch:3,kind:'world',name:'ส่งของตามพิกัด',concept:'def + tuple + loop',
+  story:'<b>ฝ่ายจัดส่ง:</b> มีออเดอร์ส่งของ 4 จุด พิกัดอยู่ในรายการ targets',
+  lesson:{html:`<p>รวมทุกอย่างที่เรียนมา: เขียนฟังก์ชันที่รับ parameter แล้วเรียกใช้ใน loop</p>
+<ul><li>พิกัด (0, 0) คือมุมซ้ายล่าง x เพิ่มเมื่อไป East, y เพิ่มเมื่อไป North</li>
+<li><code>get_x()</code> <code>get_y()</code> บอกตำแหน่งหุ่นตอนนี้</li></ul>`,
+   example:'def go_east(steps):\n    for i in range(steps):\n        move(East)\n\ngo_east(2)\nprint("ตอนนี้อยู่ที่", (get_x(), get_y()))'},
+  brief:'targets เป็น list ของพิกัด (x, y) ที่มีเหรียญวางอยู่ (สุ่มทุกครั้ง) เขียนฟังก์ชัน go_to(x, y) ให้หุ่นเดินไปที่พิกัดนั้น แล้วเก็บเหรียญให้ครบ',
+  goal:'เก็บเหรียญให้ครบทุกพิกัด (ต้องผ่านได้ทุกครั้งที่ Run)',
+  api:['def go_to(x, y):','while get_x() < x:','for x, y in targets:','take()'],
+  hints:['ใน go_to ใช้ while 4 ชุด เช่น <code>while get_x() &lt; x: move(East)</code> และ <code>while get_x() &gt; x: move(West)</code>','ทำแบบเดียวกันกับแกน y ด้วย North / South','loop หลัก: <code>for x, y in targets:</code> → <code>go_to(x, y)</code> → <code>take()</code>'],
+  starter:'# ระบบสร้างตัวแปร targets ไว้ให้แล้ว\n',
+  parLines:12, par:W=>W.meta.d,
+  build(r){const W=makeWorld(7,7);const pts=[];
+    while(pts.length<4){const x=ri(r,0,6),y=ri(r,0,6);if((x||y)&&!pts.some(p=>p[0]===x&&p[1]===y))pts.push([x,y]);}
+    let d=0,cx=0,cy=0;for(const[x,y]of pts){at(W,x,y).t='coin';d+=Math.abs(x-cx)+Math.abs(y-cy)+1;cx=x;cy=y;}
+    W.totalCoins=4;W.meta={d};W.pre='targets = ['+pts.map(([x,y])=>`(${x}, ${y})`).join(', ')+']';return W;},
+  check:allCoins},
+
+ {id:'painter',ch:3,kind:'world',name:'Bolt นักวาด',concept:'ฟังก์ชันเรียกฟังก์ชัน',
+  story:'<b>ฝ่ายความปลอดภัย:</b> ช่วยทาสีกรอบสี่เหลี่ยมบนพื้นตามแบบ เป็นเขตห้ามเข้าของเครื่องจักร',
+  lesson:{html:`<p>ฟังก์ชันหนึ่งเรียกอีกฟังก์ชันได้ แบ่งงานใหญ่เป็นชิ้นเล็กๆ ที่ทดสอบแยกกันได้ เช่น <code>go_to()</code> จากด่านที่แล้ว + <code>draw_square()</code> ใหม่</p>
+<ul><li><code>paint()</code> ทาสีช่องที่หุ่นยืนอยู่</li>
+<li>loop ผ่าน list ของทิศก็ได้: <code>for d in [East, North, West, South]:</code></li></ul>`,
+   example:'def draw_line(length):\n    for i in range(length):\n        paint()\n        move(East)\n\ndraw_line(3)'},
+  brief:'squares เป็น list ของ (x, y, size) คือมุมซ้ายล่างและขนาดของกรอบ ให้ทาสีเฉพาะขอบกรอบให้ตรงกับเส้นประทุกกรอบ ห้ามทาเกิน',
+  goal:'ช่องที่ทาสีตรงกับแบบทุกช่อง ไม่ขาด ไม่เกิน',
+  api:['def draw_square(size):','for d in [East, North, West, South]:','paint()','go_to(x, y)'],
+  hints:['ก๊อป go_to จากด่านส่งของมาใช้ได้เลย','กรอบขนาด size มี 4 ด้าน แต่ละด้านทาสีแล้วเดิน <code>size - 1</code> ครั้ง เดินครบ 4 ด้านจะกลับมาที่มุมเดิมพอดี','loop หลัก: <code>for x, y, size in squares:</code> → <code>go_to(x, y)</code> → <code>draw_square(size)</code>'],
+  starter:'# ระบบสร้างตัวแปร squares ไว้ให้แล้ว\n',
+  parLines:18, par:W=>W.meta.d,
+  build(r){const N=10;let W,sq;
+    for(;;){W=makeWorld(N,N);sq=[];let tries=0;const n=ri(r,2,3);
+      while(sq.length<n&&tries++<200){const s=ri(r,3,4),x=ri(r,0,N-s),y=ri(r,0,N-s);
+        if(sq.some(([a,b,t])=>x<a+t+1&&a<x+s+1&&y<b+t+1&&b<y+s+1))continue;sq.push([x,y,s]);}
+      if(sq.length===n)break;}
+    let d=0,cx=0,cy=0;
+    for(const[x,y,s]of sq){for(let i=0;i<s;i++)for(const[a,b]of[[x+i,y],[x+i,y+s-1],[x,y+i],[x+s-1,y+i]])at(W,a,b).tg=1;
+      d+=Math.abs(x-cx)+Math.abs(y-cy)+8*(s-1);cx=x;cy=y;}
+    W.meta={d};W.pre='squares = ['+sq.map(([x,y,s])=>`(${x}, ${y}, ${s})`).join(', ')+']';return W;},
+  check:W=>{let miss=0,extra=0;for(const c of W.cells){if(c.tg&&!c.pt)miss++;if(c.pt&&!c.tg)extra++;}
+    return!miss&&!extra?{ok:true,msg:'ทาสีตรงแบบทุกช่อง'}:{ok:false,msg:`ยังขาด ${miss} ช่อง · ทาเกิน ${extra} ช่อง`};}},
+
+ {id:'farm',ch:3,kind:'world',name:'ฟาร์มอัตโนมัติ',concept:'loop ซ้อน + def',
+  story:'<b>โรงอาหาร:</b> ผักหมด! ปลูกในแปลงหลังโรงงานแล้วเก็บมาให้ได้ 72 ผล',
+  lesson:{html:`<p><b>Loop ซ้อน</b>: loop ข้างในจะวนครบทุกรอบ ก่อนที่ loop ข้างนอกจะขยับไป 1 รอบ เหมาะกับงานแบบตาราง (แถว × คอลัมน์)</p>`,
+   example:'for y in range(2):\n    for x in range(3):\n        print("แถว", y, "คอลัมน์", x)'},
+  brief:'แปลงดิน 6×6 ปลูกด้วย plant() พืชใช้เวลาโต 24 action แล้วจึงเก็บได้ด้วย harvest() ต้องเก็บให้ได้ 72 ผล',
+  goal:'เก็บเกี่ยวรวม 72 ผล',
+  api:['def tend():','if can_harvest():','harvest()','plant()'],
+  hints:['เดินแบบงูเลื้อย: แถวคู่เดินขวา แถวคี่เดินซ้าย แล้วขึ้นบน 1 ช่อง','เขียน <code>def tend():</code> ที่เก็บถ้าสุก แล้วปลูกใหม่ถ้าเป็นดินว่าง โค้ดหลักจะสั้นลงมาก','get_tile() ในด่านนี้คืน "soil", "growing" หรือ "ripe"'],
+  starter:'',
+  parLines:18, par:()=>280,
+  build(){return makeWorld(6,6,'soil');},
+  check:W=>W.harvested>=72?{ok:true,msg:`เก็บเกี่ยวได้ ${W.harvested} ผล`}:{ok:false,msg:`เก็บได้ ${W.harvested} จาก 72 ผล`}},
+
+/* ===== บทที่ 5 ===== */
+ {id:'maze',ch:4,kind:'world',name:'เขาวงกตชั้นใต้ดิน',concept:'อัลกอริทึม + dict',
+  story:'<b>ช่างไฟ:</b> ไฟดับทั้งชั้นใต้ดิน Bolt มองเห็นแค่ช่องข้างตัว ต้องหาทางไปสวิตช์ให้ได้',
+  lesson:{html:`<p>ด่านนี้ไม่มีสูตรตายตัว ต้องคิด<b>อัลกอริทึม</b>ที่ใช้ได้กับทุกเขาวงกต ลองคิดเป็นภาษาคนก่อน (pseudocode) แล้วค่อยแปลงเป็น Python</p>
+<p>dictionary ใช้เก็บความสัมพันธ์ระหว่างทิศได้สะดวก</p>`,
+   example:'right = {North: East, East: South, South: West, West: North}\nfacing = North\nprint("ทางขวาของ", facing, "คือ", right[facing])'},
+  brief:'เขาวงกตสุ่มใหม่ทุกครั้ง หุ่นมองได้แค่ช่องข้างตัว ต้องหาทางไปธงให้ได้กับทุกเขาวงกต',
+  goal:'ยืนบนธงตอนโค้ดจบ (ต้องผ่านได้ทุกครั้งที่ Run)',
+  api:['right = {North: East, East: South, South: West, West: North}','can_move(d)','while get_tile() != "goal":'],
+  hints:['วิธีของคน: เอามือขวาแตะกำแพงไว้แล้วเดินไปเรื่อยๆ ในเขาวงกตที่ไม่มีวงวนจะถึงทางออกเสมอ','เก็บทิศที่หันไว้ในตัวแปร <code>facing</code> และใช้ dict หาทิศขวา/ซ้าย/ถอยหลัง','แต่ละก้าวลองตามลำดับ: ขวา → ตรง → ซ้าย → ถอย ทางไหนเดินได้ก่อนก็ไปแล้วเปลี่ยน facing'],
+  starter:'',
+  parLines:16, par:W=>W.meta.d*2,
+  build(r){const N=6,S=2*N-1;const W=makeWorld(S,S,'wall');
+    const seen=new Set(['0,0']);const st=[[0,0]];at(W,0,0).t='empty';
+    while(st.length){const[cx,cy]=st[st.length-1];
+      const nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[cx+dx,cy+dy,dx,dy]).filter(([x,y])=>x>=0&&y>=0&&x<N&&y<N&&!seen.has(x+','+y));
+      if(!nb.length){st.pop();continue;}
+      const[nx,ny,dx,dy]=nb[Math.floor(r()*nb.length)];seen.add(nx+','+ny);
+      at(W,cx*2+dx,cy*2+dy).t='empty';at(W,nx*2,ny*2).t='empty';st.push([nx,ny]);}
+    const d=bfs(W,0,0);let best=0,bi=0;d.forEach((v,i)=>{if(v>best){best=v;bi=i;}});
+    W.cells[bi].t='goal';W.meta={d:best};return W;},
+  check:onGoal},
+
+ {id:'sort',ch:4,kind:'world',name:'เรียงกล่องตามเลข',concept:'อัลกอริทึม sorting',
+  story:'<b>หัวหน้าโกดัง:</b> ลังเลขสลับกันมั่วไปหมด เรียงจากน้อยไปมากให้ที',
+  lesson:{html:`<p>การเรียงลำดับ (sorting) เป็นโจทย์คลาสสิก วิธีที่ง่ายที่สุดคือ <b>Bubble sort</b>: เทียบทีละคู่ที่ติดกัน ถ้าลำดับผิดก็สลับ ทำซ้ำหลายรอบจนไม่มีอะไรต้องสลับ</p>`,
+   example:'a = [5, 2, 8]\nif a[0] > a[1]:\n    a[0], a[1] = a[1], a[0]   # สลับค่า\nprint(a)'},
+  brief:'กล่อง 8 ใบมีตัวเลขสุ่ม เรียงให้น้อยไปมากจากซ้ายไปขวา measure() อ่านเลขกล่องใต้หุ่น swap(East) สลับกล่องใต้หุ่นกับกล่องทางขวา',
+  goal:'กล่องเรียงจากน้อยไปมากตอนโค้ดจบ',
+  api:['measure()','swap(East)','swap(West)'],
+  hints:['เดินจากซ้ายไปขวา ถ้ากล่องนี้มากกว่ากล่องถัดไปก็สลับ จบหนึ่งรอบเลขมากสุดจะไปอยู่ขวาสุด','จะรู้เลขกล่องถัดไปต้องเดินไปอ่าน แล้วจำค่าก่อนหน้าไว้ในตัวแปร','ทำซ้ำจนรอบนั้นไม่ต้องสลับเลย'],
+  starter:'',
+  parLines:14, par:()=>90,
+  build(r){const W=makeWorld(8,1);let v;
+    do{v=Array.from({length:8},()=>ri(r,1,9));}while(v.every((x,i)=>i===0||v[i-1]<=x));
+    v.forEach((x,i)=>{at(W,i,0).t='crate';at(W,i,0).v=x;});return W;},
+  check:W=>{const v=[];for(let x=0;x<W.w;x++)v.push(at(W,x,0).v);
+    return v.every((x,i)=>i===0||v[i-1]<=x)?{ok:true,msg:'เรียงครบ: '+v.join(' ')}:{ok:false,msg:'ยังไม่เรียง: '+v.join(' ')};}},
+];
+
+class Sim{
+  constructor(W){this.W=W;this.events=[];this.sense=0;this.ended=null;}
+  stats(){return{coins:this.W.coins,harvested:this.W.harvested};}
+  emit(kind,cells){const W=this.W;this.events.push({kind,tick:W.tick,rx:W.rx,ry:W.ry,dir:W.dir,cells,s:this.stats()});}
+  act(){if(++this.W.tick>MAX_TICKS)throw new GameError('RuntimeError',`ใช้ action เกิน ${MAX_TICKS} ครั้ง (น่าจะมี infinite loop)`);}
+  probe(){if(++this.sense>MAX_SENSE)throw new GameError('RuntimeError','เรียกคำสั่งตรวจสอบเกินลิมิต (น่าจะมี infinite loop)');}
+  dir(d,fn){if(typeof d!=='string'||!DIRS[d])throw new GameError('ValueError',`${fn}() ต้องระบุทิศเป็น North, South, East หรือ West เช่น ${fn}(East)`);return DIRS[d];}
+  inside(x,y){return x>=0&&y>=0&&x<this.W.w&&y<this.W.h;}
+  blocked(x,y){return!this.inside(x,y)||at(this.W,x,y).t==='wall';}
+  here(){return at(this.W,this.W.rx,this.W.ry);}
+  snap(x,y){return[x,y,{...at(this.W,x,y)}];}
+  tileName(c){if(c.t==='crop')return this.W.tick-c.p>=GROW?'ripe':'growing';return c.t;}
+  print(text,cls){this.events.push({kind:'print',text,cls});}
+  move(d){const[dx,dy]=this.dir(d,'move');this.act();const W=this.W;W.dir=d;
+    const nx=W.rx+dx,ny=W.ry+dy;if(this.blocked(nx,ny)){this.emit('bump');return false;}
+    W.rx=nx;W.ry=ny;this.emit('move');return true;}
+  can_move(d){const[dx,dy]=this.dir(d,'can_move');this.probe();return!this.blocked(this.W.rx+dx,this.W.ry+dy);}
+  look(d){const[dx,dy]=this.dir(d,'look');this.probe();const x=this.W.rx+dx,y=this.W.ry+dy;
+    return this.inside(x,y)?this.tileName(at(this.W,x,y)):'wall';}
+  get_tile(){this.probe();return this.tileName(this.here());}
+  read_sign(){this.probe();const c=this.here();return c.t==='sign'?c.v:null;}
+  take(){this.act();const c=this.here();if(c.t!=='coin'){this.emit('noop');return false;}
+    c.t='empty';this.W.coins++;this.emit('take',[this.snap(this.W.rx,this.W.ry)]);return true;}
+  paint(){this.act();const c=this.here();c.pt=1;this.emit('paint',[this.snap(this.W.rx,this.W.ry)]);return null;}
+  plant(){this.act();const c=this.here();if(c.t!=='soil'){this.emit('noop');return false;}
+    c.t='crop';c.p=this.W.tick;this.emit('plant',[this.snap(this.W.rx,this.W.ry)]);return true;}
+  can_harvest(){this.probe();const c=this.here();return c.t==='crop'&&this.W.tick-c.p>=GROW;}
+  harvest(){this.act();const c=this.here();if(!(c.t==='crop'&&this.W.tick-c.p>=GROW)){this.emit('noop');return false;}
+    c.t='soil';delete c.p;this.W.harvested++;this.emit('harvest',[this.snap(this.W.rx,this.W.ry)]);return true;}
+  wait(){this.act();this.emit('noop');return null;}
+  measure(){this.probe();const c=this.here();return c.t==='crate'?c.v:null;}
+  swap(d){const[dx,dy]=this.dir(d,'swap');this.act();const W=this.W;const nx=W.rx+dx,ny=W.ry+dy;const c=this.here();
+    if(!this.inside(nx,ny)||c.t!=='crate'||at(W,nx,ny).t!=='crate'){this.emit('noop');return false;}
+    const o=at(W,nx,ny);[c.v,o.v]=[o.v,c.v];this.emit('swap',[this.snap(W.rx,W.ry),this.snap(nx,ny)]);return true;}
+  get_x(){this.probe();return this.W.rx;}
+  get_y(){this.probe();return this.W.ry;}
+  get_width(){this.probe();return this.W.w;}
+  get_height(){this.probe();return this.W.h;}
+}
+
+/* ----- Dungeon ----- */
+const MON={
+  slime:{hp:3,atk:1,xp:3,gold:2,th:'สไลม์'},
+  bat:{hp:2,atk:2,xp:4,gold:3,th:'ค้างคาว'},
+  skeleton:{hp:5,atk:2,xp:6,gold:4,th:'โครงกระดูก'},
+  golem:{hp:16,atk:4,xp:30,gold:25,th:'โกเลม'},
+};
+function xpNeed(l){return 8+l*8;}
+function playerMax(lvl,up){return 20+(lvl-1)*3+up.hp*5;}
+function playerAtk(lvl,up){return 2+Math.floor((lvl-1)/2)+up.atk;}
+
+function buildFloor(floor,seed){
+  const r=rng(seed),N=11;
+  for(let tries=0;;tries++){
+    const W=makeWorld(N,N,'empty');
+    for(let i=0;i<W.cells.length;i++){const x=i%N,y=(i/N)|0;if(x+y>2&&r()<0.2)W.cells[i].t='wall';}
+    const d=bfs(W,0,0);let n=0;d.forEach((v,i)=>{if(v<0)W.cells[i].t='wall';else n++;});
+    if(n<62&&tries<30)continue;
+    let best=0,bi=0;d.forEach((v,i)=>{if(v>best){best=v;bi=i;}});
+    W.cells[bi].t='stairs';const sx=bi%N,sy=(bi/N)|0;
+    const free=[];d.forEach((v,i)=>{if(v>=3&&i!==bi)free.push(i);});
+    const take=()=>free.splice(Math.floor(r()*free.length),1)[0];
+    W.mons=[];let id=0;
+    const pool=floor<3?['slime','slime','bat']:floor<6?['slime','bat','skeleton']:['bat','skeleton','skeleton'];
+    const cnt=Math.min(3+Math.floor(floor*0.8),12),hpB=Math.floor((floor-1)*0.6),atB=Math.floor((floor-1)/3);
+    for(let k=0;k<cnt&&free.length;k++){const i=take(),t=pool[Math.floor(r()*pool.length)],b=MON[t];
+      W.mons.push({id:id++,t,x:i%N,y:(i/N)|0,hp:b.hp+hpB,max:b.hp+hpB,atk:b.atk+atB});}
+    if(floor%5===0){
+      const nb=Object.values(DIRS).map(([dx,dy])=>[sx+dx,sy+dy]).filter(([x,y])=>x>=0&&y>=0&&x<N&&y<N&&at(W,x,y).t!=='wall'&&!W.mons.some(m=>m.x===x&&m.y===y));
+      if(nb.length){const[x,y]=nb[0];const hp=MON.golem.hp+floor*2;W.mons.push({id:id++,t:'golem',x,y,hp,max:hp,atk:MON.golem.atk+Math.floor(floor/5)});}}
+    const occ=i=>W.mons.some(m=>m.y*N+m.x===i);
+    const nc=2+Math.floor(r()*3);for(let k=0;k<nc&&free.length;k++){const i=take();if(!occ(i))W.cells[i].t='coin';}
+    if(r()<0.6&&free.length){const i=take();if(!occ(i))W.cells[i].t='potion';}
+    W.floor=floor;W.seed=seed;W.stairs=[sx,sy];
+    return W;
+  }
+}
+
+class DSim{
+  constructor(W,P,up){this.W=W;this.P={...P};this.up=up;this.events=[];this.sense=0;this.ended=null;
+    this.r=rng((W.seed^0x5bd1e995)>>>0);this.kills=0;this.gx=0;this.gg=0;this.changed=null;W.ps=this.stats();}
+  maxhp(){return playerMax(this.P.lvl,this.up);}
+  atk(){return playerAtk(this.P.lvl,this.up);}
+  def(){return this.up.def;}
+  stats(){const P=this.P;return{hp:P.hp,maxhp:this.maxhp(),xp:P.xp,need:xpNeed(P.lvl),lvl:P.lvl,gold:P.gold,potions:P.potions,atk:this.atk(),def:this.def(),floor:this.W.floor};}
+  emit(kind,fx){const W=this.W;W.ps=this.stats();
+    this.events.push({kind,tick:W.tick,rx:W.rx,ry:W.ry,dir:W.dir,cells:this.changed,mons:W.mons.map(m=>({...m})),s:{coins:0,harvested:0},ps:W.ps,fx});this.changed=null;}
+  print(text,cls){this.events.push({kind:'print',text,cls});}
+  check(){if(this.ended)throw new StopSignal();}
+  act(){this.check();if(++this.W.tick>D_MAX_TICKS)throw new GameError('RuntimeError',`ใช้ action เกิน ${D_MAX_TICKS} ครั้งในชั้นเดียว (หุ่นวนอยู่ที่เดิม?)`);}
+  probe(){this.check();if(++this.sense>MAX_SENSE)throw new GameError('RuntimeError','เรียกคำสั่งตรวจสอบเกินลิมิต (น่าจะมี infinite loop)');}
+  dir(d,fn){if(typeof d!=='string'||!DIRS[d])throw new GameError('ValueError',`${fn}() ต้องระบุทิศเป็น North, South, East หรือ West เช่น ${fn}(East)`);return DIRS[d];}
+  inside(x,y){return x>=0&&y>=0&&x<this.W.w&&y<this.W.h;}
+  wallAt(x,y){return!this.inside(x,y)||at(this.W,x,y).t==='wall';}
+  monAt(x,y){return this.W.mons.find(m=>m.x===x&&m.y===y);}
+  blocked(x,y){return this.wallAt(x,y)||!!this.monAt(x,y);}
+  free(x,y){return!this.blocked(x,y)&&!(x===this.W.rx&&y===this.W.ry)&&at(this.W,x,y).t!=='stairs';}
+  tileAt(x,y){if(!this.inside(x,y))return'wall';if(this.monAt(x,y))return'monster';return at(this.W,x,y).t;}
+  gainXp(n,fx){const P=this.P;P.xp+=n;this.gx+=n;
+    while(P.xp>=xpNeed(P.lvl)){P.xp-=xpNeed(P.lvl);P.lvl++;P.hp=this.maxhp();
+      fx.push({x:this.W.rx,y:this.W.ry,t:'LV '+P.lvl,c:'lvl',dy:-.4});this.print(`★ LEVEL UP! ตอนนี้ Lv ${P.lvl} — HP เต็ม, Max HP ${this.maxhp()}, ATK ${this.atk()}\n`,'lvl');}}
+  monsters(fx){
+    const W=this.W,P=this.P;
+    for(const m of W.mons){
+      const dist=Math.abs(m.x-W.rx)+Math.abs(m.y-W.ry);
+      if(dist===1){const dmg=Math.max(1,m.atk-this.def());P.hp-=dmg;fx.push({x:W.rx,y:W.ry,t:'-'+dmg,c:'hurt'});continue;}
+      let step=null;
+      if(m.t==='bat'){if(this.r()<0.5){const ds=Object.values(DIRS);step=ds[Math.floor(this.r()*4)];}}
+      else if((m.t==='skeleton'&&dist<=7)||(m.t==='golem'&&dist<=4&&W.tick%2===0)){
+        const opts=[];if(W.rx!==m.x)opts.push([Math.sign(W.rx-m.x),0]);if(W.ry!==m.y)opts.push([0,Math.sign(W.ry-m.y)]);
+        if(Math.abs(W.ry-m.y)>Math.abs(W.rx-m.x))opts.reverse();
+        step=opts.find(([dx,dy])=>this.free(m.x+dx,m.y+dy))||null;}
+      if(step&&this.free(m.x+step[0],m.y+step[1])){m.x+=step[0];m.y+=step[1];}
+    }
+    if(P.hp<=0){P.hp=0;this.ended='dead';this.print('✖ หุ่นพัง!\n','e');}
+  }
+  pickup(fx){const W=this.W,P=this.P,c=at(W,W.rx,W.ry);
+    if(c.t==='coin'){c.t='empty';P.gold+=3;this.gg+=3;fx.push({x:W.rx,y:W.ry,t:'+3G',c:'gold',dy:-.35});this.changed=[[W.rx,W.ry,{t:'empty'}]];}
+    else if(c.t==='potion'){c.t='empty';P.potions++;fx.push({x:W.rx,y:W.ry,t:'+ยา',c:'heal',dy:-.35});this.changed=[[W.rx,W.ry,{t:'empty'}]];}}
+  move(d){const[dx,dy]=this.dir(d,'move');this.act();const W=this.W,fx=[];W.dir=d;const nx=W.rx+dx,ny=W.ry+dy;
+    if(this.blocked(nx,ny)){this.monsters(fx);this.emit('bump',fx);this.check();return false;}
+    W.rx=nx;W.ry=ny;this.pickup(fx);
+    if(at(W,nx,ny).t==='stairs'){this.ended='clear';this.emit('move',fx);this.check();}
+    this.monsters(fx);this.emit('move',fx);this.check();return true;}
+  attack(d){const[dx,dy]=this.dir(d,'attack');this.act();const W=this.W,fx=[];W.dir=d;const m=this.monAt(W.rx+dx,W.ry+dy);
+    if(m){const a=this.atk();m.hp-=a;fx.push({x:m.x,y:m.y,t:'-'+a,c:'dmg'});
+      if(m.hp<=0){W.mons=W.mons.filter(o=>o!==m);this.kills++;const b=MON[m.t];this.P.gold+=b.gold;this.gg+=b.gold;
+        fx.push({x:m.x,y:m.y,t:`+${b.xp}XP`,c:'xp',dy:-.4});this.gainXp(b.xp,fx);}}
+    this.monsters(fx);this.emit('attack',fx);this.check();return!!m;}
+  use_potion(){this.act();const W=this.W,P=this.P,fx=[];let ok=false;
+    if(P.potions>0&&P.hp<this.maxhp()){P.potions--;const h=Math.min(10,this.maxhp()-P.hp);P.hp+=h;fx.push({x:W.rx,y:W.ry,t:'+'+h,c:'heal'});ok=true;}
+    this.monsters(fx);this.emit('noop',fx);this.check();return ok;}
+  wait(){this.act();const fx=[];this.monsters(fx);this.emit('noop',fx);this.check();return null;}
+  can_move(d){const[dx,dy]=this.dir(d,'can_move');this.probe();return!this.blocked(this.W.rx+dx,this.W.ry+dy);}
+  look(d){const[dx,dy]=this.dir(d,'look');this.probe();return this.tileAt(this.W.rx+dx,this.W.ry+dy);}
+  get_tile(){this.probe();return at(this.W,this.W.rx,this.W.ry).t;}
+  get_hp(){this.probe();return this.P.hp;}
+  get_max_hp(){this.probe();return this.maxhp();}
+  get_level(){this.probe();return this.P.lvl;}
+  get_potions(){this.probe();return this.P.potions;}
+  get_floor(){this.probe();return this.W.floor;}
+  get_x(){this.probe();return this.W.rx;}
+  get_y(){this.probe();return this.W.ry;}
+  get_width(){this.probe();return this.W.w;}
+  get_height(){this.probe();return this.W.h;}
+  scan(){this.probe();if(!this.up.radar)throw new GameError('NameError','scan() ต้องซื้อ "เรดาร์" ในร้านอัปเกรดก่อน');
+    const W=this.W,dist=m=>Math.abs(m.x-W.rx)+Math.abs(m.y-W.ry);
+    return W.mons.slice().sort((a,b)=>dist(a)-dist(b)).map(m=>[m.x,m.y,m.t,m.hp]);}
+  find_stairs(){this.probe();if(!this.up.map)throw new GameError('NameError','find_stairs() ต้องซื้อ "แผนที่" ในร้านอัปเกรดก่อน');return[...this.W.stairs];}
+}
+
+const API_FNS=['move','can_move','look','get_tile','read_sign','take','paint','plant','can_harvest','harvest','wait','measure','swap','get_x','get_y','get_width','get_height',
+  'attack','use_potion','get_hp','get_max_hp','get_level','get_potions','get_floor','scan','find_stairs'];
+
+function applyEvent(W,ev){
+  if(ev.kind==='print')return;
+  W.rx=ev.rx;W.ry=ev.ry;W.dir=ev.dir;W.tick=ev.tick;W.coins=ev.s.coins;W.harvested=ev.s.harvested;
+  if(ev.cells)for(const[x,y,c]of ev.cells)W.cells[y*W.w+x]={...c};
+  if(ev.mons)W.mons=ev.mons.map(m=>({...m}));
+  if(ev.ps)W.ps={...ev.ps};
+}
+function countLines(code){return code.split('\n').filter(l=>{const t=l.trim();return t&&!t.startsWith('#');}).length;}
+/*ENGINE-END*/
+
+/* ---------- Python runtime (Skulpt) ---------- */
+const $=id=>document.getElementById(id);
+let SkReady=false, currentSim=null, busy=false;
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+function toPy(v){
+  if(v===null||v===undefined)return Sk.builtin.none.none$;
+  if(typeof v==='boolean')return v?Sk.builtin.bool.true$:Sk.builtin.bool.false$;
+  if(typeof v==='number')return new Sk.builtin.int_(v);
+  if(Array.isArray(v))return new Sk.builtin.list(v.map(toPy));
+  return new Sk.builtin.str(String(v));
+}
+function installApi(){
+  for(const name of API_FNS){
+    Sk.builtins[name]=new Sk.builtin.func(function(...args){
+      if(typeof currentSim[name]!=='function')throw new Sk.builtin.NameError(`${name}() ใช้ไม่ได้ในด่านนี้`);
+      try{return toPy(currentSim[name](...args.map(a=>Sk.ffi.remapToJs(a))));}
+      catch(e){if(e instanceof StopSignal)throw new Sk.builtin.RuntimeError('__stop__');
+        if(e instanceof GameError)throw new Sk.builtin[e.py](e.message);throw e;}
+    });
+  }
+  for(const d of Object.keys(DIRS))Sk.builtins[d]=new Sk.builtin.str(d);
+}
+(async()=>{
+  try{
+    await loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js');
+    await loadScript('https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js');
+    installApi();SkReady=true;$('loadMsg').hidden=true;lockUi(false);
+  }catch(e){$('loadMsg').textContent='โหลด Python ไม่สำเร็จ ลองรีเฟรชหน้า';}
+})();
+
+const ERR_HELP={
+  NameError:'ใช้ชื่อที่ยังไม่ได้สร้าง หรือสะกดผิด (ตัวพิมพ์ใหญ่-เล็กมีผล: East ไม่ใช่ east, print ไม่ใช่ Print) หรือลืมใส่เครื่องหมายคำพูดรอบข้อความ',
+  SyntaxError:'รูปแบบโค้ดผิด เช็ค : ท้าย if/for/while/def, วงเล็บครบคู่, และเครื่องหมายคำพูดเปิด-ปิดครบ',
+  IndentationError:'การย่อหน้าไม่ตรงกัน บรรทัดใน block เดียวกันต้องย่อหน้าเท่ากัน (4 ช่อง) และหลัง : ต้องมีบรรทัดที่ย่อหน้า',
+  TypeError:'ใช้ค่าผิดชนิด เช่นเอา string ไปบวกกับตัวเลข ("80" + 5) ลืมแปลง input() ด้วย int() หรือเปล่า? หรือจำนวน argument ไม่ตรงกับฟังก์ชัน',
+  ValueError:'แปลงค่าไม่ได้ เช่น int("abc") หรือ int("12.5")',
+  IndexError:'เรียก index เกินขนาด list เช่น list มี 3 ตัว (index 0–2) แต่ไปอ่าน [3]',
+  KeyError:'ไม่มี key นี้ใน dictionary ลองใช้ .get(key, ค่าสำรอง)',
+  ZeroDivisionError:'หารด้วยศูนย์',
+  TimeLimitError:'โค้ดรันนานเกิน 4 วินาที น่าจะมี while ที่เงื่อนไขไม่เคยเป็น False (infinite loop)',
+};
+
+async function runPython(code,sim,opts={}){
+  currentSim=sim;const inputs=(opts.inputs||[]).slice();let asked=0;const given=inputs.length;
+  Sk.configure({
+    output:t=>sim.print(t),
+    read:f=>{if(!Sk.builtinFiles||!Sk.builtinFiles.files[f])throw new Error('File not found: '+f);return Sk.builtinFiles.files[f];},
+    __future__:Sk.python3, execLimit:4000, inputfunTakesPrompt:true,
+    inputfun:p=>{asked++;const v=inputs.length?String(inputs.shift()):'';
+      sim.print(`${p||''}${v}${asked>given?'   ← ไม่มีค่าให้ป้อนแล้ว: test นี้ป้อนให้แค่ '+given+' ครั้ง':''}\n`,'in');return v;},
+  });
+  const injected=[];
+  try{
+    if(opts.pre){Sk.execStart=Date.now();
+      const m=await Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody('__pre__',false,opts.pre,true));
+      for(const k of Object.keys(m.$d))if(!k.startsWith('__')){Sk.builtins[k]=m.$d[k];injected.push(k);}}
+    Sk.execStart=Date.now();
+    await Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody('<stdin>',false,code,true));return null;
+  }catch(e){
+    if(sim.ended)return null;
+    const s=(e&&e.toString)?e.toString():String(e);
+    const m=s.match(/^(\w+):\s*([\s\S]*?)(?: on line (\d+))?$/);
+    const line=(e&&e.traceback&&e.traceback[0]&&e.traceback[0].lineno)||(m&&m[3]?+m[3]:null);
+    return{type:m?m[1]:'Error',msg:m?m[2]:s,line};
+  }finally{for(const k of injected)delete Sk.builtins[k];}
+}
+
+/* ---------- state ---------- */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+             set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+(function migrate(){
+  if(store.get('robo.progress2',null))return;
+  const old=['hello','corridor','coins','stairs','unknown','maze','farm','sort'];
+  const p=store.get('robo.progress',{}),np={};
+  old.forEach((id,i)=>{if(p[i])np[id]=p[i];const c=store.get('robo.code.'+i,null);if(c!=null&&store.get('robo.code2.'+id,null)==null)store.set('robo.code2.'+id,c);});
+  store.set('robo.progress2',np);
+})();
+let progress=store.get('robo.progress2',{});
+let seenLesson=store.get('robo.seenLesson',{});
+let li=Math.max(0,LEVELS.findIndex(L=>L.id===store.get('robo.levelId','print')));
+let mode=store.get('robo.mode','tut');
+let viewWorld=null, rp=null, errLine=null;
+const cur=()=>LEVELS[li];
+const isTerm=()=>mode==='tut'&&cur().kind==='term';
+
+const DEF_SAVE={lvl:1,xp:0,gold:0,up:{atk:0,def:0,hp:0,pot:0,radar:0,map:0},floor:1,hp:null,potions:null,seed:null,best:0,deaths:0};
+let D=loadD();
+function loadD(){const s=store.get('robo.dungeon',{});const d={...JSON.parse(JSON.stringify(DEF_SAVE)),...s};d.up={...DEF_SAVE.up,...(s.up||{})};return d;}
+function saveD(){store.set('robo.dungeon',D);}
+function dMax(){return playerMax(D.lvl,D.up);}
+function ensureFloor(){if(D.seed==null)D.seed=(Math.random()*2**32)>>>0;if(D.hp==null)D.hp=dMax();if(D.potions==null)D.potions=D.up.pot;}
+function playerState(){return{lvl:D.lvl,xp:D.xp,hp:D.hp,gold:D.gold,potions:D.potions};}
+
+const DUN_STARTER=`# โหมดดันเจี้ยน: พาหุ่นไปเหยียบบันได (ช่องลายขั้น) เพื่อลงชั้นถัดไป
+# มอนสเตอร์ขยับและโจมตีหลังทุก action ของเรา
+# เดินทับเหรียญหรือยาจะเก็บให้อัตโนมัติ
+
+def fight():
+    # ถ้ามีมอนสเตอร์อยู่ติดตัว ตีก่อน
+    for d in [North, East, South, West]:
+        if look(d) == "monster":
+            attack(d)
+            return True
+    return False
+
+while True:
+    if fight():
+        continue
+    # TODO: ตัดสินใจว่าจะเดินไปทางไหน
+    # โค้ดด้านล่างแค่เดินมั่วๆ จะติดกำแพงแน่นอน ลองเขียนให้ฉลาดกว่านี้
+    if not move(East):
+        move(North)
+`;
+const DUN_HINTS=[
+  'ใช้ยาตอนเลือดน้อย: <code>if get_hp() &lt; 8 and get_potions() &gt; 0: use_potion()</code> เอาไว้ต้นของ loop',
+  'การหาทาง: วิธีเกาะกำแพงจากด่านเขาวงกตใช้ได้ แต่ห้องในดันเจี้ยนมีวงวนได้ เลยอาจเดินวนไม่จบ ลองเก็บช่องที่เคยไปไว้ใน <code>set()</code> ของ tuple <code>(x, y)</code> แล้วเลือกไปช่องที่ยังไม่เคยไปก่อน',
+  'ขั้นต่อไปคือ DFS ด้วย stack: เก็บเส้นทางที่เดินมาไว้ใน list ถ้ารอบตัวไม่มีช่องใหม่แล้วให้ pop แล้วเดินถอยกลับ แบบนี้สำรวจได้ทั้งห้องแน่นอน',
+  'ซื้อ "แผนที่" แล้ว <code>find_stairs()</code> จะบอกตำแหน่งบันได ถ้าทำ BFS บนแผนที่ที่จำไว้ได้ จะหาเส้นทางสั้นที่สุดไปบันไดได้',
+];
+const SHOP=[
+  {k:'radar',name:'เรดาร์',desc:'ปลดล็อก <code>scan()</code> คืน list มอนสเตอร์ทุกตัว [x, y, ชนิด, hp] เรียงจากใกล้ไปไกล',cost:()=>30,max:1},
+  {k:'map',name:'แผนที่',desc:'ปลดล็อก <code>find_stairs()</code> คืนตำแหน่งบันได [x, y]',cost:()=>40,max:1},
+  {k:'atk',name:'ใบมีดคม',desc:'ATK +1 ถาวร ตีแรงขึ้น มอนตายเร็วขึ้น',cost:n=>15+15*n,max:10},
+  {k:'def',name:'เกราะ',desc:'DEF +1 ลดดาเมจที่โดนทุกครั้ง (โดนขั้นต่ำ 1)',cost:n=>20+20*n,max:4},
+  {k:'hp',name:'แบตเตอรี่',desc:'Max HP +5 ถาวร',cost:n=>10+10*n,max:10},
+  {k:'pot',name:'กระเป๋ายา',desc:'ได้ยาเพิ่ม 1 ขวดทันที และเริ่มรอบใหม่ทุกครั้งพร้อมยาเพิ่มอีก 1 (ยาฟื้น 10 HP)',cost:n=>25+25*n,max:3},
+];
+
+const REF=[
+ ['move(d)','เดิน 1 ช่องไปทิศ d คืน True ถ้าเดินได้ False ถ้าชนกำแพง','1'],
+ ['can_move(d)','ทิศ d เดินได้ไหม (True/False)','0'],
+ ['look(d)','ช่องข้างๆ ทิศ d คืออะไร ("wall", "empty", "coin", …)','0'],
+ ['get_tile()','ช่องใต้หุ่นคืออะไร: "empty" "coin" "goal" "sign" "soil" "growing" "ripe" "crate"','0'],
+ ['read_sign()','ป้ายใต้หุ่น: "U" "D" "L" "R" (None ถ้าไม่มีป้าย)','0'],
+ ['take()','เก็บเหรียญใต้หุ่น','1'],
+ ['paint()','ทาสีช่องใต้หุ่น','1'],
+ ['plant()','ปลูกบนดิน "soil"','1'],
+ ['can_harvest()','พืชใต้หุ่นสุกแล้วหรือยัง','0'],
+ ['harvest()','เก็บพืชที่สุกแล้ว ช่องจะกลับเป็นดิน','1'],
+ ['wait()','รอ 1 action ไม่ทำอะไร','1'],
+ ['measure()','เลขบนกล่องใต้หุ่น (None ถ้าไม่มีกล่อง)','0'],
+ ['swap(d)','สลับกล่องใต้หุ่นกับกล่องทิศ d','1'],
+ ['get_x(), get_y()','ตำแหน่งหุ่น (0,0 คือมุมซ้ายล่าง)','0'],
+ ['get_width(), get_height()','ขนาดแผนที่','0'],
+ ['North South East West','ค่าคงที่ทิศ (บน ล่าง ขวา ซ้าย)',''],
+ ['print(x)','แสดงค่าในช่อง Output',''],
+];
+const DREF=[
+ ['move(d)','เดิน 1 ช่อง ชนกำแพงหรือมอนจะไม่ขยับ (คืน False) เดินทับเหรียญ/ยาจะเก็บให้เอง เหยียบบันไดคือผ่านชั้น','1'],
+ ['attack(d)','ตีช่องติดกันทิศ d คืน True ถ้าโดนมอนสเตอร์','1'],
+ ['use_potion()','ใช้ยา ฟื้น 10 HP','1'],
+ ['wait()','รอ 1 ตา (มอนก็ยังขยับ)','1'],
+ ['can_move(d)','False ถ้ามีกำแพงหรือมอนขวาง','0'],
+ ['look(d)','"wall" "empty" "monster" "coin" "potion" "stairs"','0'],
+ ['get_hp(), get_max_hp()','HP ตอนนี้ / สูงสุด','0'],
+ ['get_level(), get_potions()','เลเวล / จำนวนยาที่มี','0'],
+ ['get_x(), get_y(), get_floor()','ตำแหน่ง (0,0 = มุมซ้ายล่าง) / ชั้นปัจจุบัน','0'],
+ ['scan()','ต้องซื้อเรดาร์ · list ของ [x, y, ชนิด, hp]','0'],
+ ['find_stairs()','ต้องซื้อแผนที่ · [x, y] ของบันได','0'],
+];
+const MONREF='มอนสเตอร์: <b>สไลม์</b> อยู่กับที่ · <b>ค้างคาว</b> บินมั่ว · <b>โครงกระดูก</b> เดินเข้าหาถ้าอยู่ใกล้ · <b>โกเลม</b> บอสทุก 5 ชั้น ทุกตัวตีเมื่ออยู่ติดตัวเรา';
+const refRows=rows=>'<tr><td><b>คำสั่ง</b></td><td><b>ทำอะไร</b></td><td class="c">action</td></tr>'+rows.map(([a,b,c])=>`<tr><td>${a}</td><td>${b}</td><td class="c">${c===''?'—':c}</td></tr>`).join('');
+$('refTable').innerHTML=refRows(REF);
+$('dRef').innerHTML=refRows(DREF)+`<tr><td colspan="3" style="font-family:var(--f-body);white-space:normal">${MONREF}</td></tr>`;
+
+/* ---------- helpers ---------- */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function setupHints(box,btn,list){
+  let shown=0;box.innerHTML='';btn.hidden=!list.length;btn.textContent=`ขอคำใบ้ (${list.length})`;
+  btn.onclick=()=>{if(shown<list.length){box.insertAdjacentHTML('beforeend',`<div class="hint"><b>คำใบ้ ${shown+1}:</b> ${list[shown]}</div>`);shown++;}
+    const left=list.length-shown;if(left<=0)btn.hidden=true;else btn.textContent=`คำใบ้ถัดไป (${left})`;};
+}
+function levelLabel(i){const L=LEVELS[i];const n=LEVELS.filter((x,j)=>x.ch===L.ch&&j<=i).length;return `${L.ch+1}.${n}`;}
+const doneCount=()=>LEVELS.filter(L=>progress[L.id]&&progress[L.id].done).length;
+
+/* ---------- modes ---------- */
+function setMode(m){
+  stopReplay();mode=m;store.set('robo.mode',m);
+  $('mTut').classList.toggle('on',m==='tut');$('mDun').classList.toggle('on',m==='dun');
+  $('mTut').setAttribute('aria-selected',m==='tut');$('mDun').setAttribute('aria-selected',m==='dun');
+  $('lvbar').hidden=m!=='tut';$('lvbar').style.visibility='';$('tutBrief').hidden=m!=='tut';$('dunBrief').hidden=m!=='dun';$('autoWrap').hidden=m!=='dun';
+  $('result').hidden=true;errLine=null;closeMenu();
+  if(m==='tut')selectLevel(li);else enterDungeon();
+}
+$('mTut').onclick=()=>setMode('tut');
+$('mDun').onclick=()=>setMode('dun');
+$('goDun').onclick=()=>setMode('dun');
+
+function codeKey(){return mode==='dun'?'robo.code.dungeon':'robo.code2.'+cur().id;}
+function starterCode(){return mode==='dun'?DUN_STARTER:cur().starter;}
+function loadCode(){const c=store.get(codeKey(),null);ta.value=c!=null?c:starterCode();$('fixNote').hidden=true;updateEditor();ta.scrollTop=0;}
+
+/* ---------- level bar + menu ---------- */
+function renderLevelBar(){
+  const L=cur();$('lpNum').textContent=levelLabel(li);$('lpName').textContent=L.name;
+  $('prevLv').disabled=li===0;$('nextLv').disabled=li===LEVELS.length-1;
+  const n=doneCount();$('progTxt').textContent=`${n}/${LEVELS.length} ด่าน`;$('progBar').style.width=(n/LEVELS.length*100)+'%';
+  $('tutCta').hidden=!LEVELS.filter(x=>x.ch<=3).every(x=>progress[x.id]&&progress[x.id].done);
+  if(!$('lvMenu').hidden)renderMenu();
+}
+function renderMenu(){
+  $('lvMenu').innerHTML=CHAPTERS.map((C,ci)=>`<div class="mchap"><h4>บทที่ ${ci+1} · ${C.name}</h4><small>${C.week} · ${C.area}</small>`+
+    LEVELS.map((L,i)=>{if(L.ch!==ci)return'';const p=progress[L.id];
+      return `<button class="mrow${i===li?' cur':''}" data-i="${i}"><span class="n">${levelLabel(i)}</span><span class="t">${esc(L.name)}</span><span class="k">${L.kind==='term'?'โค้ด':'หุ่นยนต์'}</span><span class="s${p&&p.done?'':' todo'}">${p&&p.done?('★'.repeat(p.stars)||'✓'):'○'}</span></button>`;}).join('')+'</div>').join('');
+}
+function openMenu(){renderMenu();$('lvMenu').hidden=false;$('lvPick').setAttribute('aria-expanded','true');}
+function closeMenu(){$('lvMenu').hidden=true;$('lvPick').setAttribute('aria-expanded','false');}
+$('lvPick').onclick=e=>{e.stopPropagation();$('lvMenu').hidden?openMenu():closeMenu();};
+$('lvMenu').addEventListener('click',e=>{e.stopPropagation();const b=e.target.closest('.mrow');if(b){closeMenu();selectLevel(+b.dataset.i);}});
+document.addEventListener('click',()=>{if(!$('lvMenu').hidden)closeMenu();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
+$('prevLv').onclick=()=>{if(li>0)selectLevel(li-1);};
+$('nextLv').onclick=()=>{if(li<LEVELS.length-1)selectLevel(li+1);};
+
+/* ---------- tabs ---------- */
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(b=>{b.classList.toggle('on',b.dataset.tab===t);b.setAttribute('aria-selected',b.dataset.tab===t);});
+  ['mission','lesson','ref'].forEach(k=>$('tab-'+k).hidden=k!==t);
+  if(t==='lesson'&&!seenLesson[cur().id]){seenLesson[cur().id]=1;store.set('robo.seenLesson',seenLesson);markLessonDot();}
+}
+function markLessonDot(){const b=document.querySelector('.tab[data-tab="lesson"]');b.innerHTML='บทเรียน'+(seenLesson[cur().id]?'':'<span class="dot" title="ยังไม่ได้อ่าน"></span>');}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$('toMission').onclick=()=>showTab('mission');
+
+/* ---------- tutorial ---------- */
+function selectLevel(i){
+  stopReplay();li=i;const L=cur();store.set('robo.levelId',L.id);errLine=null;
+  const C=CHAPTERS[L.ch];
+  $('lvNum').textContent=`บทที่ ${L.ch+1} · ${C.week} · ด่าน ${levelLabel(i)}`;
+  $('lvConcept').textContent=L.concept;
+  $('lvTitle').textContent=L.name;
+  $('lvStory').innerHTML=L.story||'';$('lvStory').hidden=!L.story;
+  $('lessonBody').innerHTML=L.lesson.html+`<pre class="ex">${esc(L.lesson.example)}</pre>`;
+  $('exNote').textContent=L.kind==='world'?'ตัวอย่างจะรันกับหุ่นในด่านนี้':(L.lesson.exInputs&&L.lesson.exInputs.length?`ระบบจะป้อนค่า ${L.lesson.exInputs.join(', ')} ให้`:'');
+  $('lvBrief').textContent=L.brief;
+  $('fileName').textContent=`${L.id}.py`;
+  $('lvApi').innerHTML=L.api.map(a=>`<button class="chip" type="button" data-ins="${esc(a)}">${esc(a)}</button>`).join('');
+  setupHints($('hints'),$('hintBtn'),L.hints);
+  const done=progress[L.id]&&progress[L.id].done;
+  markLessonDot();showTab(!done&&!seenLesson[L.id]?'lesson':'mission');
+  loadCode();applyLayout();newPreview();renderLevelBar();$('result').hidden=true;setView('brief');
+}
+function goalsHtml(L,W){
+  let h=`<div class="g0"><b class="m">✓</b><span>${L.goal}</span></div>`;
+  if(L.kind==='world')h+=`<div><b class="m">★</b><span>ใช้ไม่เกิน <b style="font-family:var(--f-mono)">${L.par(W)}</b> action (เดิน/เก็บ/ทาสี/สลับ นับ 1 ส่วนการตรวจสอบไม่นับ)</span></div>`;
+  else h+=`<div><b class="m">★</b><span>ผ่านทุก test</span></div>`;
+  h+=`<div><b class="m">★</b><span>โค้ดไม่เกิน <b style="font-family:var(--f-mono)">${L.parLines}</b> บรรทัด (ไม่นับบรรทัดว่างและ comment)</span></div>`;
+  if(W&&W.pre)h+=`<div class="gv"><b class="m">=</b><span>ตัวแปรที่ระบบให้ (เปลี่ยนทุกครั้งที่ Run): <code>${esc(W.pre)}</code></span></div>`;
+  return h;
+}
+function applyLayout(){
+  const term=isTerm();
+  $('stage').hidden=term;$('bench').hidden=!term;$('stats').hidden=term;$('legend').hidden=term;$('benchNote').hidden=!term;$('speedWrap').hidden=term;$('stopBtn').hidden=term;
+  $('resTitle').textContent=mode==='dun'?'ดันเจี้ยน':term?'ชุดทดสอบ':'สนามทดสอบ';setBadge('');
+}
+
+/* ---------- test bench ---------- */
+function renderBench(L,results){
+  const multi=L.tests.length>1;
+  $('benchNote').textContent=results?`ผ่าน ${results.filter(r=>r.ok).length} จาก ${results.length} test`:`มี ${L.tests.length} test · กด Run เพื่อตรวจ`;
+  const head='<tr><th>#</th><th>ข้อมูลที่ระบบให้</th><th>ผลที่ต้องได้</th><th>ผลของคุณ</th><th></th></tr>';
+  const firstBad=results?results.findIndex(r=>!r.ok):-1;
+  $('testTable').innerHTML=head+L.tests.map((t,i)=>{
+    const r=results&&results[i];
+    const given=[t.pre?`<code>${esc(t.pre)}</code>`:'',t.inputs?`input: ${t.inputs.map(v=>`<code>${esc(v)}</code>`).join(' ')}`:'',t.calls?`เรียก ${t.calls.map(c=>`<code>${esc(c)}</code>`).join(' ')}`:''].filter(Boolean).join('<br>')||'<span class="empty-out">ไม่มี</span>';
+    const expLines=t.calls?t.expectCalls:normLines(t.expect);
+    const exp=expLines.length?`<pre>${esc(expLines.join('\n'))}</pre>`:'<span class="empty-out">(ไม่แสดงอะไร)</span>';
+    let act='<span class="empty-out">ยังไม่ได้รัน</span>',st='<td class="st wait">–</td>';
+    if(r){
+      if(r.err)act=`<pre style="color:var(--bad)">${esc(r.err.type)}${r.err.line?` บรรทัด ${r.err.line}`:''}</pre><span class="why">${esc(ERR_HELP[r.err.type]||r.err.msg)}</span>`;
+      else act=(r.got.length?`<pre>${esc(r.got.join('\n'))}</pre>`:'<span class="empty-out">(ไม่แสดงอะไร)</span>')+(r.why?`<span class="why">${esc(r.why)}</span>`:'')+(r.soft?`<span class="soft">${esc(r.soft)}</span>`:'');
+      st=r.ok?'<td class="st ok">✓</td>':'<td class="st no">✗</td>';
+    }
+    return `<tr${i===firstBad?' class="focus"':''}><td>${multi?i+1:''}</td><td class="given">${given}</td><td>${exp}</td><td>${act}</td>${st}</tr>`;}).join('');
+}
+
+async function runTerm(code,L){
+  const results=[],nLines=code.split('\n').length;
+  for(const [i,t] of L.tests.entries()){
+    const sim=new Sim(makeWorld(1,1));
+    const err=await runPython(code+'\n'+harnessFor(t.calls),sim,{pre:t.pre,inputs:t.inputs});
+    if(err&&err.line&&err.line>nLines)err.line=null;
+    const printed=sim.events.filter(e=>e.cls!=='in').map(e=>e.text).join('');
+    if(L.tests.length>1)outText(`— test ${i+1} —\n`,'sys');
+    for(const e of sim.events){const txt=e.text.split('\n').filter(l=>!l.startsWith(MARK)&&!l.startsWith(MARKE)).join('\n');if(txt)outText(txt,e.cls);}
+    if(err){outText(`${err.type}${err.line?` (บรรทัด ${err.line})`:''}: ${err.msg}\n`,'e');results.push({ok:false,err,got:[]});if(err.line&&errLine==null)errLine=err.line;continue;}
+    results.push(judge(t,printed,L.tol));
+  }
+  updateEditor();
+  return results;
+}
+
+/* ---------- dungeon ---------- */
+function dungeonWorld(){const W=buildFloor(D.floor,D.seed);new DSim(W,playerState(),D.up);return W;}
+function enterDungeon(){
+  ensureFloor();saveD();
+  $('fileName').textContent='dungeon_bot.py';
+  setupHints($('dHints'),$('dHintBtn'),DUN_HINTS);
+  loadCode();applyLayout();renderDungeon();newPreview();
+}
+function renderDungeon(){
+  const ready=LEVELS.filter(L=>L.ch<=1).every(L=>progress[L.id]&&progress[L.id].done);
+  $('dNote').innerHTML=(ready?'':'<b>แนะนำ:</b> ผ่านบทที่ 1–2 ก่อน (โดยเฉพาะ loop และ if) ไม่งั้นจะยากมาก<br>')+'ตายเมื่อไหร่กลับไปเริ่มชั้น 1 แต่เลเวล ทอง และของที่ซื้อไว้ยังอยู่ครบ ถ้าสคริปต์จบก่อนถึงบันได ชั้นนั้นจะเริ่มใหม่แบบเดิมให้แก้โค้ดได้';
+  $('dFloorLbl').textContent=`ชั้น ${D.floor} · สถิติลึกสุด ${D.best}`;
+  $('goldLbl').textContent=`${D.gold} G`;
+  $('dSummary').innerHTML=`<span>Lv <b>${D.lvl}</b></span><span>XP <b>${D.xp}/${xpNeed(D.lvl)}</b></span><span>HP <b>${D.hp}/${dMax()}</b></span><span>ATK <b>${playerAtk(D.lvl,D.up)}</b> DEF <b>${D.up.def}</b></span><span>ยา <b>${D.potions}</b></span><span>ตายไปแล้ว <b>${D.deaths}</b> ครั้ง</span>`;
+  $('shop').innerHTML=SHOP.map(it=>{const n=D.up[it.k],maxed=n>=it.max,c=it.cost(n);
+    return `<div class="item"><div class="ih"><span>${it.name}</span><small>${it.max>1?`${n}/${it.max}`:(n?'มีแล้ว':'')}</small></div><p>${it.desc}</p>
+      <button class="btn sm${!maxed&&D.gold>=c?' primary':''}" data-k="${it.k}" ${maxed||D.gold<c||rp||busy?'disabled':''}>${maxed?'ครบแล้ว':`ซื้อ ${c} G`}</button></div>`;}).join('');
+}
+$('shop').addEventListener('click',e=>{const b=e.target.closest('button[data-k]');if(!b||rp||busy)return;
+  const it=SHOP.find(s=>s.k===b.dataset.k),n=D.up[it.k],c=it.cost(n);if(n>=it.max||D.gold<c)return;
+  D.gold-=c;D.up[it.k]++;if(it.k==='hp')D.hp+=5;if(it.k==='pot')D.potions++;
+  saveD();renderDungeon();newPreview();outText(`ซื้อ ${it.name} แล้ว (เหลือ ${D.gold} G)\n`,'sys');});
+$('wipeBtn').onclick=()=>{$('wipeAsk').hidden=false;$('wipeBtn').hidden=true;};
+$('wipeNo').onclick=()=>{$('wipeAsk').hidden=true;$('wipeBtn').hidden=false;};
+$('wipeYes').onclick=()=>{D=JSON.parse(JSON.stringify(DEF_SAVE));ensureFloor();saveD();$('wipeAsk').hidden=true;$('wipeBtn').hidden=false;renderDungeon();newPreview();$('result').hidden=true;};
+
+/* ---------- preview ---------- */
+const LEG={
+  base:[['--robot','Bolt'],['--goal','ธง']],
+  coins:[['--coin','เหรียญ']],arrows:[['--sign','ป้ายลูกศร']],painter:[['--ghost','แบบที่ต้องทาสี'],['--paint','ทาสีแล้ว']],
+  farm:[['--soil','ดิน'],['--leaf','กำลังโต'],['--ripe','สุกแล้ว']],warehouse:[['--crate','ลังสินค้า']],sort:[['--crate','กล่อง']],delivery:[['--coin','จุดส่งของ']],
+  dun:[['--robot','Bolt'],['--stairs','บันได'],['--coin','เหรียญ'],['--potion','ยา'],['--slime','สไลม์'],['--bat','ค้างคาว'],['--bone','โครงกระดูก'],['--boss','โกเลม']],
+};
+function renderLegend(){
+  let items;
+  if(mode==='dun')items=LEG.dun;else{const id=cur().id;items=[LEG.base[0],...(LEG[id]||[]),...(['print','coins','warehouse','sort','farm','painter','delivery'].includes(id)?[]:[LEG.base[1]])];}
+  $('legend').innerHTML=items.map(([t,l])=>`<span><i style="background:var(${t})"></i>${l}</span>`).join('');
+}
+function newPreview(){
+  renderLegend();
+  if(mode==='dun'){viewWorld=dungeonWorld();renderStats(viewWorld);draw();return;}
+  const L=cur();
+  if(L.kind==='term'){viewWorld=null;$('lvGoals').innerHTML=goalsHtml(L,null);$('termResult').hidden=true;$('codeCheck').hidden=true;renderBench(L,null);return;}
+  viewWorld=L.build(rng((Math.random()*2**32)>>>0));$('lvGoals').innerHTML=goalsHtml(L,viewWorld);
+  renderStats(viewWorld);draw();
+}
+
+/* ---------- editor: syntax highlight overlay ---------- */
+const ta=$('code'),hl=$('hl');
+const KW=new Set('and as break continue def del elif else except False finally for from if import in is lambda None not or pass raise return True try while with global'.split(' '));
+const BI=new Set(['print','input','int','float','str','len','range','round','type','set','dict','list','tuple','sum','max','min','abs','sorted','repr','enumerate','bool',...API_FNS]);
+const DIRSET=new Set(Object.keys(DIRS));
+function hlLine(line){
+  let out='';const re=/(#.*$)|([fF]?("|')(?:\\.|(?!\3).)*\3?)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)|([^#"'A-Za-z_\d]+|.)/g;let m;
+  while((m=re.exec(line))){
+    if(m[1])out+=`<span class="k-com">${esc(m[1])}</span>`;
+    else if(m[2])out+=`<span class="k-str">${esc(m[2])}</span>`;
+    else if(m[4])out+=`<span class="k-num">${m[4]}</span>`;
+    else if(m[5]){const w=m[5];out+=KW.has(w)?`<span class="k-kw">${w}</span>`:BI.has(w)?`<span class="k-fn">${w}</span>`:DIRSET.has(w)?`<span class="k-dir">${w}</span>`:w;}
+    else out+=esc(m[0]);
+    if(m[0]==='')re.lastIndex++;
+  }
+  return out;
+}
+function updateEditor(){
+  const lines=ta.value.split('\n');let g='',h='';
+  lines.forEach((l,i)=>{g+=`<div${i+1===errLine?' class="err"':''}>${i+1}</div>`;h+=`<div${i+1===errLine?' class="errl"':''}>${hlLine(l)||'&#8203;'}</div>`;});
+  $('gutter').innerHTML=g;hl.innerHTML=h+'<div>&#8203;</div>';syncScroll();
+}
+function syncScroll(){hl.scrollTop=ta.scrollTop;hl.scrollLeft=ta.scrollLeft;$('gutter').scrollTop=ta.scrollTop;}
+let saveT;
+ta.addEventListener('input',()=>{errLine=null;updateEditor();clearTimeout(saveT);const k=codeKey();saveT=setTimeout(()=>store.set(k,ta.value),300);});
+ta.addEventListener('scroll',syncScroll);
+function insert(text){ta.focus();ta.setRangeText(text,ta.selectionStart,ta.selectionEnd,'end');ta.dispatchEvent(new Event('input'));}
+function insertSnippet(s){
+  const v=ta.value,p=ta.selectionStart,ls=v.lastIndexOf('\n',p-1)+1,lineBefore=v.slice(ls,p);
+  const ind=(v.slice(ls).match(/^ */)||[''])[0];
+  let txt=s;
+  if(lineBefore.trim()!==''){txt='\n'+ind+s;}
+  if(/:$/.test(s))txt+='\n'+ind+'    ';
+  insert(txt);
+}
+$('lvApi').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)insertSnippet(b.dataset.ins);});
+ta.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();return;}
+  if(e.key==='Tab'){e.preventDefault();
+    const s=ta.selectionStart,v=ta.value,ls=v.lastIndexOf('\n',s-1)+1;
+    if(e.shiftKey){const m=v.slice(ls).match(/^ {1,4}/);if(m){ta.setRangeText('',ls,ls+m[0].length,'preserve');ta.selectionStart=ta.selectionEnd=Math.max(ls,s-m[0].length);ta.dispatchEvent(new Event('input'));}}
+    else insert('    ');return;}
+  if(e.key==='Enter'&&!e.isComposing){e.preventDefault();const s=ta.selectionStart,v=ta.value,ls=v.lastIndexOf('\n',s-1)+1;
+    const line=v.slice(ls,s);let ind=line.match(/^ */)[0];if(/:\s*(#.*)?$/.test(line))ind+='    ';insert('\n'+ind);return;}
+  if(e.key==='Backspace'&&ta.selectionStart===ta.selectionEnd){const s=ta.selectionStart,v=ta.value,ls=v.lastIndexOf('\n',s-1)+1;
+    const before=v.slice(ls,s);if(before.length&&/^ +$/.test(before)){e.preventDefault();const k=((before.length-1)%4)+1;ta.setRangeText('',s-k,s,'end');ta.dispatchEvent(new Event('input'));}}
+});
+$('resetCode').onclick=()=>{ta.value=starterCode();ta.dispatchEvent(new Event('input'));$('fixNote').hidden=true;};
+const KEYS=[['⇥','    '],[':',':'],['(','('],[')',')'],['"','"'],["'","'"],['[','['],[']',']'],['{','{'],['}','}'],['=','='],['==','=='],[',',','],['_','_'],['#','#'],['+','+'],['<','<'],['>','>']];
+$('keybar').innerHTML=KEYS.map(([l,v])=>`<button class="key" type="button" data-v="${esc(v)}">${esc(l)}</button>`).join('');
+$('keybar').addEventListener('pointerdown',e=>{if(e.target.closest('.key'))e.preventDefault();});
+$('keybar').addEventListener('click',e=>{const b=e.target.closest('.key');if(b)insert(b.dataset.v);});
+
+/* ---------- speed ---------- */
+const SPEEDS=[[600,'ช้ามาก'],[320,'ช้า'],[160,'ปกติ'],[70,'เร็ว'],[20,'เร็วมาก'],[0,'ทันที']];
+function speedMs(){return SPEEDS[+$('speed').value-1][0];}
+$('speed').oninput=()=>{$('speedLbl').textContent=SPEEDS[+$('speed').value-1][1];store.set('robo.speed',+$('speed').value);};
+$('speed').value=store.get('robo.speed',3);$('speed').oninput();
+$('auto').checked=store.get('robo.auto',false);$('auto').onchange=()=>store.set('robo.auto',$('auto').checked);
+
+/* ---------- output ---------- */
+const out=$('out');
+function outText(t,cls){if(out.querySelector('.x'))out.innerHTML='';const s=document.createElement('span');if(cls)s.className=cls;s.textContent=t;out.appendChild(s);
+  while(out.childNodes.length>500)out.removeChild(out.firstChild);out.scrollTop=out.scrollHeight;}
+$('clearOut').onclick=()=>{out.innerHTML='';};
+
+/* ---------- stats ---------- */
+function barCls(p){return p<.25?'low':p<.5?'mid':'';}
+function renderStats(W){
+  if(!W){$('stats').innerHTML='';return;}
+  let h='';
+  if(W.ps){const s=W.ps,hp=s.maxhp?s.hp/s.maxhp:0;
+    h+=`<div class="stat full"><span class="k">HP</span><div class="bar ${barCls(hp)}"><i style="width:${Math.max(0,hp*100)}%"></i></div><span class="v">${s.hp} <small>/ ${s.maxhp}</small></span></div>`;
+    h+=`<div class="stat full"><span class="k">Lv ${s.lvl}</span><div class="bar xp"><i style="width:${s.xp/s.need*100}%"></i></div><span class="v">${s.xp} <small>/ ${s.need} XP</small></span></div>`;
+    h+=`<div class="stat"><div class="k">ชั้น</div><div class="v">${s.floor}</div></div>`;
+    h+=`<div class="stat"><div class="k">ATK / DEF</div><div class="v">${s.atk} <small>/</small> ${s.def}</div></div>`;
+    h+=`<div class="stat"><div class="k">ยา</div><div class="v">${s.potions}</div></div>`;
+    h+=`<div class="stat"><div class="k">ทอง</div><div class="v">${s.gold} <small>G</small></div></div>`;
+    h+=`<div class="stat"><div class="k">actions</div><div class="v">${W.tick}</div></div>`;
+    h+=`<div class="stat"><div class="k">มอนเหลือ</div><div class="v">${W.mons.length}</div></div>`;
+  }else{
+    const L=cur();h+=`<div class="stat"><div class="k">actions</div><div class="v">${W.tick} <small>/ ${L.par(W)}</small></div></div>`;
+    if(W.totalCoins)h+=`<div class="stat"><div class="k">เหรียญ</div><div class="v">${W.coins} <small>/ ${W.totalCoins}</small></div></div>`;
+    if(L.id==='farm')h+=`<div class="stat"><div class="k">เก็บเกี่ยว</div><div class="v">${W.harvested} <small>/ 72</small></div></div>`;
+    h+=`<div class="stat"><div class="k">ตำแหน่ง</div><div class="v">(${W.rx}, ${W.ry})</div></div>`;
+    h+=`<div class="stat"><div class="k">โค้ด</div><div class="v">${countLines(ta.value)} <small>บรรทัด</small></div></div>`;
+  }
+  $('stats').innerHTML=h;
+}
+
+/* ---------- run ---------- */
+const RUN_HTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>Run';
+function lockUi(on){busy=on;$('runBtn').disabled=on||!SkReady||!!rp;$('exBtn').disabled=on||!SkReady||!!rp;if(on)$('runBtn').textContent='กำลังรัน…';else $('runBtn').innerHTML=RUN_HTML;}
+function prepareCode(){
+  const raw=ta.value,fixed=normalizeCode(raw);
+  if(fixed!==raw){const p=ta.selectionStart;ta.value=fixed;ta.selectionStart=ta.selectionEnd=Math.min(p,fixed.length);updateEditor();
+    $('fixNote').hidden=false;$('fixNote').textContent='แก้ให้อัตโนมัติ: เครื่องหมายคำพูดแบบโค้ง “ ” (มักติดมาจากมือถือหรือสไลด์) และ Tab ถูกเปลี่ยนเป็นแบบที่ Python อ่านได้';}
+  else $('fixNote').hidden=true;
+  return fixed;
+}
+async function run(){
+  if(!SkReady||rp||busy)return;
+  closeMenu();
+  const code=prepareCode();store.set(codeKey(),code);
+  errLine=null;updateEditor();$('result').hidden=true;
+  if(isTerm())return runTermLevel(code);
+  return runWorld(code,false);
+}
+async function runTermLevel(code){
+  const L=cur();lockUi(true);$('termResult').hidden=true;
+  outText(`— Run ${L.name} —\n`,'sys');
+  const issues=codeIssues(L,code);
+  const results=await runTerm(code,L);
+  lockUi(false);
+  renderBench(L,results);
+  revealResults();
+  $('codeCheck').hidden=!issues.length;$('codeCheck').innerHTML=issues.map(m=>'• '+esc(m)).join('<br>');
+  const pass=results.every(r=>r.ok),box=$('termResult');box.hidden=false;
+  const errored=results.find(r=>r.err);
+  if(errored&&ERR_HELP[errored.err.type])outText('→ '+ERR_HELP[errored.err.type]+'\n','x');
+  if(!pass||issues.length){
+    const bad=results.find(r=>!r.ok);
+    let tip='ดูแถวที่ไฮไลต์สีแดงในตาราง เทียบ "ผลที่ต้องได้" กับ "ผลของคุณ"';
+    if(bad&&bad.err)tip=`โค้ดมี error ที่บรรทัด ${bad.err.line||'?'} (ไฮไลต์สีแดงใน editor) — ${ERR_HELP[bad.err.type]||bad.err.msg}`;
+    else if(bad&&bad.why)tip=bad.why;
+    setBadge('no');
+    box.className='result inline fail';
+    box.innerHTML=`<div><div class="rt">${pass?'ผลถูกแล้ว เหลืออีกนิด':'ยังไม่ผ่าน'}</div><div class="rs"><span>${pass?'แก้ตามเงื่อนไขด้านล่างอีกข้อเดียว':`ผ่าน <b>${results.filter(r=>r.ok).length}/${results.length}</b> test`}</span>${pass?'':`<span>${esc(tip)}</span>`}</div></div>`;
+    return;
+  }
+  const lines=countLines(code),s2=lines<=L.parLines,st=1+(s2?1:0);
+  saveProgress(L,st);
+  setBadge('ok');
+  box.className='result inline ok';
+  box.innerHTML=`<div><div class="rt">ผ่าน! ${'★'.repeat(st)}${'☆'.repeat(2-st)}</div><div class="rs"><span>★ ผ่านทุก test</span><span>${s2?'★':'☆'} ${lines} บรรทัด (เป้า ≤ ${L.parLines})</span></div></div>${nextBtn()}`;
+}
+function revealResults(){if(isNarrow())setView('result');}
+const isNarrow=()=>matchMedia('(max-width:1099px)').matches;
+function setView(v){$('panes').dataset.view=v;document.querySelectorAll('.mtab').forEach(b=>b.classList.toggle('on',b.dataset.view===v));if(v==='result')requestAnimationFrame(draw);if(v==='code'&&isNarrow())setTimeout(()=>ta.focus({preventScroll:true}),50);}
+function setBadge(k){const b=$('resBadge');b.className='bd'+(k?' '+k:'');b.textContent=k==='ok'?'✓':k==='no'?'✗':'';}
+document.querySelectorAll('.mtab').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>setView(b.dataset.go));
+function saveProgress(L,st){const prev=progress[L.id];progress[L.id]={done:true,stars:Math.max(st,prev?prev.stars:0)};store.set('robo.progress2',progress);renderLevelBar();}
+function nextBtn(){
+  if(li<LEVELS.length-1)return `<button class="btn sm primary" onclick="selectLevel(${li+1})">ด่านถัดไป →</button>`;
+  return `<button class="btn sm primary" onclick="setMode('dun')">เข้าดันเจี้ยน →</button>`;
+}
+async function runWorld(code,example){
+  lockUi(true);
+  let W0,sim,L=null;
+  if(mode==='dun'){ensureFloor();W0=buildFloor(D.floor,D.seed);sim=new DSim(cloneWorld(W0),playerState(),D.up);W0.ps={...sim.W.ps};
+    outText(`— ชั้น ${D.floor} —\n`,'sys');renderDungeon();}
+  else{L=cur();W0=L.build(rng((Math.random()*2**32)>>>0));$('lvGoals').innerHTML=goalsHtml(L,W0);sim=new Sim(cloneWorld(W0));
+    outText(example?'— ตัวอย่าง —\n':`— Run ${L.name} —\n`,'sys');}
+  const err=await runPython(code,sim,{pre:W0.pre});
+  viewWorld=cloneWorld(W0);
+  rp={events:sim.events,i:0,evStart:null,from:null,anim:null,err,sim,code,L,mode,example};
+  busy=false;$('runBtn').innerHTML=RUN_HTML;$('runBtn').disabled=true;$('exBtn').disabled=true;
+  $('stopBtn').disabled=false;revealResults();
+  requestAnimationFrame(step);
+}
+$('exBtn').onclick=async()=>{
+  if(!SkReady||rp||busy)return;const L=cur();
+  if(L.kind==='world')return runWorld(L.lesson.example,true);
+  lockUi(true);outText('— ตัวอย่าง —\n','sys');
+  const sim=new Sim(makeWorld(1,1));const err=await runPython(L.lesson.example,sim,{inputs:L.lesson.exInputs||[]});
+  for(const e of sim.events)outText(e.text,e.cls);
+  if(err)outText(`${err.type}${err.line?` (บรรทัด ${err.line})`:''}: ${err.msg}\n`,'e');
+  outText('— ผลตัวอย่างอยู่ด้านบน ลองเขียนโค้ดของคุณเองใน editor —\n','sys');
+  lockUi(false);
+};
+function step(now){
+  if(!rp)return;
+  let budget=4000;
+  while(rp.i<rp.events.length&&budget--){
+    const ev=rp.events[rp.i];
+    if(ev.kind==='print'){outText(ev.text,ev.cls);rp.i++;continue;}
+    const dur=speedMs();
+    if(rp.evStart==null){rp.evStart=now;rp.from={x:viewWorld.rx,y:viewWorld.ry};}
+    const t=dur?(now-rp.evStart)/dur:1;
+    if(t<1){rp.anim={ev,t};break;}
+    applyEvent(viewWorld,ev);rp.i++;rp.anim=null;
+    if(dur){rp.evStart+=dur;rp.from={x:viewWorld.rx,y:viewWorld.ry};}else rp.evStart=null;
+  }
+  draw();renderStats(viewWorld);
+  if(rp.i>=rp.events.length&&!rp.anim)finish();else requestAnimationFrame(step);
+}
+function stopReplay(){if(rp)finish(true);}
+$('stopBtn').onclick=stopReplay;
+$('runBtn').onclick=run;
+function closeBtn(){return `<button class="btn sm" onclick="this.closest('.result').hidden=true">ปิด</button>`;}
+
+function finish(skipped){
+  const r=rp;rp=null;lockUi(false);$('stopBtn').disabled=true;
+  if(skipped)for(let i=r.i;i<r.events.length;i++)if(r.events[i].kind==='print')outText(r.events[i].text,r.events[i].cls);
+  viewWorld=cloneWorld(r.sim.W);draw();renderStats(viewWorld);
+  const box=$('result');
+  if(r.err){
+    errLine=r.err.line;updateEditor();
+    outText(`${r.err.type}${r.err.line?` (บรรทัด ${r.err.line})`:''}: ${r.err.msg}\n`,'e');
+    if(ERR_HELP[r.err.type])outText('→ '+ERR_HELP[r.err.type]+'\n','x');
+    if(r.example)return;
+    setBadge('no');
+    box.hidden=false;box.className='result fail';
+    box.innerHTML=`<div><div class="rt">โค้ดหยุดกลางทาง</div><div class="rs"><span><b>${esc(r.err.type)}</b>${r.err.line?` ที่บรรทัด ${r.err.line} (ไฮไลต์แดงใน editor)`:''}</span><span>${esc(ERR_HELP[r.err.type]||r.err.msg)}</span>${r.mode==='dun'?'<span>ชั้นนี้เริ่มใหม่แบบเดิม</span>':''}</div></div>${closeBtn()}`;
+    if(r.mode==='dun')renderDungeon();
+    return;
+  }
+  if(r.example){outText('— ตัวอย่างจบ ลองเขียนโค้ดของคุณเองใน editor —\n','sys');return;}
+  box.hidden=false;
+  if(r.mode==='dun')return finishDungeon(r,box);
+  const printed=r.sim.events.filter(e=>e.kind==='print'&&e.cls!=='in').map(e=>e.text).join('');
+  const L=r.L,v=L.check(r.sim.W,printed);
+  setBadge(v.ok?'ok':'no');
+  if(!v.ok){box.className='result fail';box.innerHTML=`<div><div class="rt">ยังไม่ผ่าน</div><div class="rs"><span>${esc(v.msg)}</span><span>ลองกด Run อีกครั้ง หรือปรับความเร็วให้ช้าลงเพื่อดูว่าหุ่นพลาดตรงไหน</span></div></div>${closeBtn()}`;return;}
+  const acts=r.sim.W.tick,par=L.par(r.sim.W),lines=countLines(r.code);
+  const s1=acts<=par,s2=lines<=L.parLines,st=(s1?1:0)+(s2?1:0);
+  saveProgress(L,st);
+  box.className='result ok';
+  box.innerHTML=`<div><div class="rt">ผ่าน! ${'★'.repeat(st)}${'☆'.repeat(2-st)}</div><div class="rs">
+    <span>${esc(v.msg)}</span>
+    <span>${s1?'★':'☆'} ${acts} action (เป้า ≤ ${par})</span>
+    <span>${s2?'★':'☆'} ${lines} บรรทัด (เป้า ≤ ${L.parLines})</span></div></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${nextBtn()}${closeBtn()}</div>`;
+}
+
+function finishDungeon(r,box){
+  const s=r.sim,P=s.P,floor=D.floor;
+  if(s.ended==='clear'){
+    D.lvl=P.lvl;D.xp=P.xp;D.gold=P.gold;D.hp=P.hp;D.potions=P.potions;
+    D.best=Math.max(D.best,floor);D.floor=floor+1;D.seed=null;ensureFloor();saveD();
+    box.className='result ok';
+    box.innerHTML=`<div><div class="rt">ผ่านชั้น ${floor}!</div><div class="rs"><span>ล้มมอน ${s.kills} ตัว · +${s.gx} XP · +${s.gg} G · ใช้ ${s.W.tick} action</span><span>HP ที่เหลือติดตัวลงไปชั้น ${D.floor}</span></div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm primary" onclick="run()">ลงชั้น ${D.floor} →</button>${closeBtn()}</div>`;
+    renderDungeon();
+    if($('auto').checked)setTimeout(()=>{if(mode==='dun'&&!rp&&!busy)run();},900);
+  }else if(s.ended==='dead'){
+    D.lvl=P.lvl;D.xp=P.xp;D.gold=P.gold;D.best=Math.max(D.best,floor);D.deaths++;
+    D.floor=1;D.hp=null;D.potions=null;D.seed=null;ensureFloor();saveD();
+    box.className='result fail';
+    box.innerHTML=`<div><div class="rt">หุ่นพังที่ชั้น ${floor}</div><div class="rs"><span>ได้มา +${s.gx} XP · +${s.gg} G ยังเก็บไว้ครบ</span><span>ใช้ทองซื้ออัปเกรด ปรับโค้ด แล้วเริ่มใหม่จากชั้น 1</span></div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm primary" onclick="run()">เริ่มใหม่</button>${closeBtn()}</div>`;
+    renderDungeon();
+  }else{
+    box.className='result fail';
+    box.innerHTML=`<div><div class="rt">สคริปต์จบก่อนถึงบันได</div><div class="rs"><span>ชั้นนี้เริ่มใหม่แบบเดิม XP และทองในรอบนี้ไม่นับ</span><span>แก้โค้ดแล้วกด Run อีกครั้ง</span></div></div>${closeBtn()}`;
+    renderDungeon();
+  }
+}
+
+/* ---------- drawing ---------- */
+const cv=$('cv'),ctx=cv.getContext('2d');
+const TOK=['--floor','--floor2','--wall','--wall-top','--coin','--goal','--soil','--soil2','--leaf','--ripe','--crate','--crate-edge','--robot','--robot-face','--ink','--muted',
+  '--stone','--stone2','--stairs','--slime','--bat','--bone','--boss','--potion','--bad','--good','--xp','--accent','--panel','--sign','--paint','--ghost'];
+function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,r):ctx.rect(x,y,w,h);}
+function drawMon(m,X,Y,cs,C,alpha){
+  ctx.globalAlpha=alpha;const cx=X+cs/2,cy=Y+cs/2;
+  if(m.t==='slime'){ctx.fillStyle=C['--slime'];ctx.beginPath();ctx.ellipse(cx,Y+cs*.68,cs*.32,cs*.24,0,Math.PI,0);ctx.lineTo(cx+cs*.32,Y+cs*.78);ctx.lineTo(cx-cs*.32,Y+cs*.78);ctx.fill();}
+  else if(m.t==='bat'){ctx.fillStyle=C['--bat'];ctx.beginPath();ctx.moveTo(cx-cs*.42,cy-cs*.12);ctx.lineTo(cx-cs*.12,cy+cs*.02);ctx.lineTo(cx-cs*.3,cy+cs*.16);ctx.fill();
+    ctx.beginPath();ctx.moveTo(cx+cs*.42,cy-cs*.12);ctx.lineTo(cx+cs*.12,cy+cs*.02);ctx.lineTo(cx+cs*.3,cy+cs*.16);ctx.fill();ctx.beginPath();ctx.arc(cx,cy,cs*.17,0,7);ctx.fill();}
+  else if(m.t==='skeleton'){ctx.fillStyle=C['--bone'];rr(cx-cs*.22,Y+cs*.2,cs*.44,cs*.42,cs*.14);ctx.fill();ctx.fillRect(cx-cs*.13,Y+cs*.6,cs*.26,cs*.16);
+    ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1;ctx.strokeRect(cx-cs*.13,Y+cs*.6,cs*.26,cs*.16);}
+  else{ctx.fillStyle=C['--boss'];rr(X+cs*.08,Y+cs*.12,cs*.84,cs*.76,cs*.12);ctx.fill();ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(X+cs*.08,Y+cs*.64,cs*.84,cs*.06);}
+  const eyeY=m.t==='slime'?Y+cs*.6:m.t==='golem'?Y+cs*.38:cy-cs*.02,gap=m.t==='golem'?cs*.18:cs*.09,er=m.t==='golem'?cs*.07:cs*.05;
+  ctx.fillStyle=m.t==='skeleton'?'#1a1a1a':'#fff';ctx.beginPath();ctx.arc(cx-gap,eyeY,er,0,7);ctx.arc(cx+gap,eyeY,er,0,7);ctx.fill();
+  if(m.t!=='skeleton'){ctx.fillStyle='#111';ctx.beginPath();ctx.arc(cx-gap,eyeY+er*.2,er*.5,0,7);ctx.arc(cx+gap,eyeY+er*.2,er*.5,0,7);ctx.fill();}
+  if(m.hp<m.max){const w=cs*.7;ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(cx-w/2,Y+cs*.05,w,Math.max(3,cs*.07));
+    ctx.fillStyle=C['--bad'];ctx.fillRect(cx-w/2,Y+cs*.05,w*Math.max(0,m.hp)/m.max,Math.max(3,cs*.07));}
+  ctx.globalAlpha=1;
+}
+const ARROW={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};
+function draw(){
+  const W=viewWorld;if(!W||$('stage').hidden)return;
+  const cs_=getComputedStyle(document.documentElement);const C={};TOK.forEach(k=>C[k]=cs_.getPropertyValue(k).trim());
+  const dun=!!W.mons;
+  const stage=$('stage');const availW=stage.clientWidth-24;const availH=stage.clientHeight-24;if(availW<=20||availH<=20)return;
+  const cs=Math.max(14,Math.floor(Math.min(availW/W.w,availH/W.h,72)));
+  const dpr=window.devicePixelRatio||1;const pw=cs*W.w,ph=cs*W.h;
+  if(cv.width!==pw*dpr||cv.height!==ph*dpr){cv.width=pw*dpr;cv.height=ph*dpr;cv.style.width=pw+'px';cv.style.height=ph+'px';}
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,pw,ph);
+  const anim=rp&&rp.anim;const tick=anim?anim.ev.tick:W.tick;
+  const sy=y=>(W.h-1-y)*cs;
+  for(let y=0;y<W.h;y++)for(let x=0;x<W.w;x++){
+    const c=at(W,x,y),X=x*cs,Y=sy(y);
+    if(c.t==='wall'){ctx.fillStyle=C['--wall'];ctx.fillRect(X,Y,cs,cs);ctx.fillStyle=C['--wall-top'];ctx.fillRect(X,Y,cs,Math.max(2,cs*.12));continue;}
+    const soilish=c.t==='soil'||c.t==='crop';
+    ctx.fillStyle=soilish?((x+y)%2?C['--soil']:C['--soil2']):dun?((x+y)%2?C['--stone']:C['--stone2']):((x+y)%2?C['--floor']:C['--floor2']);ctx.fillRect(X,Y,cs,cs);
+    if(soilish){ctx.strokeStyle='rgba(0,0,0,.12)';ctx.lineWidth=1;for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(X+cs*.15,Y+cs*k/4);ctx.lineTo(X+cs*.85,Y+cs*k/4);ctx.stroke();}}
+    const cx=X+cs/2,cy=Y+cs/2;
+    if(c.pt){ctx.fillStyle=c.tg?C['--paint']:C['--bad'];ctx.globalAlpha=.75;ctx.fillRect(X+1,Y+1,cs-2,cs-2);ctx.globalAlpha=1;}
+    if(c.tg&&!c.pt){ctx.strokeStyle=C['--ghost'];ctx.lineWidth=Math.max(1.5,cs*.06);ctx.setLineDash([cs*.12,cs*.1]);ctx.strokeRect(X+cs*.14,Y+cs*.14,cs*.72,cs*.72);ctx.setLineDash([]);}
+    if(c.t==='coin'){ctx.fillStyle=C['--coin'];ctx.beginPath();ctx.arc(cx,cy,cs*.2,0,7);ctx.fill();ctx.strokeStyle='rgba(0,0,0,.25)';ctx.lineWidth=Math.max(1,cs*.04);ctx.beginPath();ctx.arc(cx,cy,cs*.12,0,7);ctx.stroke();}
+    if(c.t==='goal'){ctx.strokeStyle=C['--ink'];ctx.lineWidth=Math.max(1.5,cs*.05);ctx.beginPath();ctx.moveTo(X+cs*.32,Y+cs*.82);ctx.lineTo(X+cs*.32,Y+cs*.18);ctx.stroke();
+      ctx.fillStyle=C['--goal'];ctx.beginPath();ctx.moveTo(X+cs*.34,Y+cs*.18);ctx.lineTo(X+cs*.78,Y+cs*.32);ctx.lineTo(X+cs*.34,Y+cs*.46);ctx.fill();}
+    if(c.t==='sign'){const[ax,ay]=ARROW[c.v];ctx.save();ctx.translate(cx,cy);ctx.rotate(Math.atan2(ay,ax));ctx.fillStyle=C['--sign'];
+      ctx.beginPath();ctx.moveTo(cs*.3,0);ctx.lineTo(-cs*.05,-cs*.24);ctx.lineTo(-cs*.05,-cs*.09);ctx.lineTo(-cs*.3,-cs*.09);ctx.lineTo(-cs*.3,cs*.09);ctx.lineTo(-cs*.05,cs*.09);ctx.lineTo(-cs*.05,cs*.24);ctx.closePath();ctx.globalAlpha=.85;ctx.fill();ctx.restore();ctx.globalAlpha=1;
+      if(cs>=26){ctx.fillStyle=C['--muted'];ctx.font=`500 ${Math.round(cs*.2)}px "JetBrains Mono",monospace`;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText(c.v,X+cs-3,Y+cs-2);}}
+    if(c.t==='stairs'){ctx.fillStyle=C['--stairs'];for(let k=0;k<4;k++){const w=cs*(.72-k*.14);ctx.fillRect(X+cs*.14+k*cs*.07,Y+cs*(.2+k*.16),w,cs*.11);}}
+    if(c.t==='potion'){ctx.fillStyle=C['--potion'];ctx.beginPath();ctx.arc(cx,cy+cs*.08,cs*.17,0,7);ctx.fill();ctx.fillRect(cx-cs*.06,cy-cs*.22,cs*.12,cs*.16);
+      ctx.fillStyle='rgba(255,255,255,.55)';ctx.beginPath();ctx.arc(cx-cs*.06,cy+cs*.03,cs*.05,0,7);ctx.fill();}
+    if(c.t==='crop'){const age=tick-c.p,g=Math.min(1,age/GROW),ripe=age>=GROW;
+      ctx.strokeStyle=C['--leaf'];ctx.lineWidth=Math.max(1.5,cs*.06);const hgt=cs*(.12+.42*g);
+      ctx.beginPath();ctx.moveTo(cx,Y+cs*.85);ctx.lineTo(cx,Y+cs*.85-hgt);ctx.stroke();
+      ctx.fillStyle=C['--leaf'];const lw=cs*(.08+.14*g);
+      ctx.beginPath();ctx.ellipse(cx-lw*.8,Y+cs*.85-hgt*.55,lw,lw*.45,-.5,0,7);ctx.fill();
+      ctx.beginPath();ctx.ellipse(cx+lw*.8,Y+cs*.85-hgt*.75,lw,lw*.45,.5,0,7);ctx.fill();
+      if(ripe){ctx.fillStyle=C['--ripe'];ctx.beginPath();ctx.arc(cx,Y+cs*.85-hgt,cs*.13,0,7);ctx.fill();}}
+    if(c.t==='crate'){const p=cs*.1;ctx.fillStyle=C['--crate'];rr(X+p,Y+p,cs-2*p,cs-2*p,cs*.06);ctx.fill();
+      ctx.strokeStyle=C['--crate-edge'];ctx.lineWidth=Math.max(1,cs*.05);ctx.stroke();
+      ctx.fillStyle=C['--ink'];ctx.font=`600 ${Math.round(cs*(String(c.v).length>1?.34:.42))}px "JetBrains Mono",monospace`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.v,cx,cy+cs*.02);}
+  }
+  const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  if(dun){
+    if(anim&&anim.ev.mons){const e=ease(anim.t),nextIds=new Set(anim.ev.mons.map(m=>m.id));
+      for(const m of W.mons)if(!nextIds.has(m.id))drawMon(m,m.x*cs,sy(m.y),cs,C,1-anim.t);
+      for(const m of anim.ev.mons){const p=W.mons.find(o=>o.id===m.id)||m;const mx=p.x+(m.x-p.x)*e,my=p.y+(m.y-p.y)*e;drawMon(m,mx*cs,(W.h-1-my)*cs,cs,C,1);}}
+    else for(const m of W.mons)drawMon(m,m.x*cs,sy(m.y),cs,C,1);
+  }
+  let rx=W.rx,ry=W.ry,dir=W.dir,bx=0,by=0,hurt=0;
+  if(anim){const{ev,t}=anim;dir=ev.dir;const e=ease(t);
+    if(ev.kind==='move'){rx=rp.from.x+(ev.rx-rp.from.x)*e;ry=rp.from.y+(ev.ry-rp.from.y)*e;}
+    else if(ev.kind==='bump'||ev.kind==='attack'){const[dx,dy]=DIRS[ev.dir];const k=Math.sin(Math.PI*t)*(ev.kind==='attack'?.32:.18);bx=dx*k;by=dy*k;}
+    if(ev.fx&&ev.fx.some(f=>f.c==='hurt'))hurt=Math.sin(Math.PI*t);}
+  const X=(rx+bx)*cs,Y=(W.h-1-(ry+by))*cs,p=cs*.16,s=cs-2*p;
+  const under=at(W,Math.round(rx),Math.round(ry)).t;
+  const dead=W.ps&&W.ps.hp<=0&&!anim;
+  ctx.globalAlpha=under==='crate'||under==='sign'?.82:1;
+  ctx.fillStyle=dead?C['--muted']:C['--robot'];rr(X+p,Y+p,s,s,cs*.16);ctx.fill();
+  if(hurt>0){ctx.fillStyle=`rgba(255,40,60,${hurt*.55})`;rr(X+p,Y+p,s,s,cs*.16);ctx.fill();}
+  const[dx,dy]=DIRS[dir]||[1,0];const ex=X+cs/2+dx*s*.2,ey=Y+cs/2-dy*s*.2;
+  ctx.fillStyle=C['--robot-face'];ctx.beginPath();ctx.arc(ex,ey,s*.17,0,7);ctx.fill();
+  ctx.fillStyle=C['--ink'];ctx.beginPath();ctx.arc(ex+dx*s*.06,ey-dy*s*.06,s*.07,0,7);ctx.fill();
+  ctx.globalAlpha=1;
+  if(anim&&anim.ev.fx&&anim.ev.fx.length){const t=anim.t;
+    ctx.font=`700 ${Math.max(11,Math.round(cs*.3))}px "Chakra Petch",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    const col={dmg:C['--accent'],hurt:C['--bad'],heal:C['--good'],xp:C['--xp'],gold:C['--coin'],lvl:C['--xp']};
+    for(const f of anim.ev.fx){const fx=f.x*cs+cs/2,fy=sy(f.y)+cs*(.3+(f.dy||0))-t*cs*.45;
+      ctx.globalAlpha=Math.min(1,2-2*t);ctx.lineWidth=3;ctx.strokeStyle=C['--panel'];ctx.strokeText(f.t,fx,fy);ctx.fillStyle=col[f.c]||C['--ink'];ctx.fillText(f.t,fx,fy);}
+    ctx.globalAlpha=1;}
+}
+window.addEventListener('resize',draw);try{new ResizeObserver(()=>draw()).observe($('stage'));}catch(e){}
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}
+document.fonts&&document.fonts.ready.then(draw);
+$('intro').hidden=!!store.get('robo.introDone',false);
+$('introClose').onclick=()=>{$('intro').hidden=true;store.set('robo.introDone',true);};
+setMode(mode==='dun'?'dun':'tut');
+</script>
+
+</html>
