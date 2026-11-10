@@ -239,6 +239,9 @@ input.is-warn{border-color:var(--coin-ink)!important}
 /* coarse-pointer input size must win over the play-view base rule above */
 @media (pointer:coarse){.vj input,.vj select,.vt input,.vt select,.vcalc input,input,select,textarea{font-size:16px}}
 
+/* resume an unfinished round */
+.resume-note{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--note);color:var(--note-ink);border-radius:4px;padding:8px 12px;margin:0 0 10px;font-size:14px}
+
 </style>
 </head>
 <body>
@@ -515,6 +518,7 @@ const DEFAULT_STATE = {
   best: {},
   mistakes: {},
   settings: { showEntryCount: false },
+  rounds: {},
 };
 
 function cloneDefault() {
@@ -534,11 +538,18 @@ function loadState(storage) {
     if (!isPlainObject(s.best) || !isPlainObject(s.mistakes)) return cloneDefault();
     if (s.settings !== undefined && !isPlainObject(s.settings)) return cloneDefault();
     const d = cloneDefault();
+    const rounds = {};
+    if (isPlainObject(s.rounds)) {
+      for (const [id, r] of Object.entries(s.rounds)) {
+        if (isValidRoundSnap(r) && r.subtopicId === id) rounds[id] = { ...r };
+      }
+    }
     return {
       v: 1,
       best: { ...s.best },
       mistakes: { ...s.mistakes },
       settings: { ...d.settings, ...(s.settings || {}) },
+      rounds,
     };
   } catch (e) {
     return cloneDefault();
@@ -560,7 +571,37 @@ function recordMistake(state, code) {
 function finishRound(state, subtopicId, missPoints) {
   const stars = starsFor(missPoints);
   const old = state.best[subtopicId] || 0;
-  return { ...state, best: { ...state.best, [subtopicId]: Math.max(old, stars) } };
+  const next = clearRound(state, subtopicId);
+  return { ...next, best: { ...next.best, [subtopicId]: Math.max(old, stars) } };
+}
+
+// ---------- unfinished rounds (one per subtopic) ----------
+// RoundSnap: { subtopicId, seed, i, miss, wrongOnCurrent } — problems are regenerated from seed.
+
+function isNonNegInt(x) {
+  return Number.isInteger(x) && x >= 0;
+}
+
+function isValidRoundSnap(r) {
+  return isPlainObject(r) && typeof r.subtopicId === 'string' &&
+    isNonNegInt(r.seed) && isNonNegInt(r.i) && isNonNegInt(r.miss) && isNonNegInt(r.wrongOnCurrent);
+}
+
+function saveRound(state, snap) {
+  if (!isValidRoundSnap(snap)) return state;
+  return { ...state, rounds: { ...(state.rounds || {}), [snap.subtopicId]: { ...snap } } };
+}
+
+function getRound(state, subtopicId) {
+  const r = state.rounds && state.rounds[subtopicId];
+  return isValidRoundSnap(r) ? r : null;
+}
+
+function clearRound(state, subtopicId) {
+  if (!state.rounds || !(subtopicId in state.rounds)) return state;
+  const rounds = { ...state.rounds };
+  delete rounds[subtopicId];
+  return { ...state, rounds };
 }
 
 function totalStars(state) {
@@ -3458,6 +3499,12 @@ function app_makeStorage() {
 
 // ---------- helpers ----------
 
+function app_playLabel(s) {
+  const r = getRound(APP.state, s.id);
+  if (r && (r.i > 0 || r.miss > 0) && r.i < 5) return 'เล่นต่อ ' + (r.i + 1) + '/5';
+  return 'ฝึก';
+}
+
 function app_chapterOf(id) {
   return CHAPTERS.find((c) => c.id === id);
 }
@@ -3644,7 +3691,7 @@ function app_viewChapter(id) {
       h('div', { class: 'row-main' },
         h('p', { class: 'row-title' }, s.title),
         h('p', { class: 'muted' }, app_starRow(best), ' ', h('span', { class: 'num' }, best + '/3'))),
-      h('div', { class: 'row-actions' }, sumBtn, app_link('#/play/' + s.id, 'btn primary', 'ฝึก')));
+      h('div', { class: 'row-actions' }, sumBtn, app_link('#/play/' + s.id, 'btn primary', app_playLabel(s))));
   });
   return app_page({ href: '#/', label: 'หน้าแรก' }, 'บท ' + idx + ' ' + ch.title,
     h('p', { class: 'muted' }, h('span', { class: 'num' }, app_chapterStars(ch) + '/' + ch.subtopics.length * 3), ' ดาว'),
@@ -3663,7 +3710,23 @@ function newRound(subtopic, seed) {
     problems = [];
     for (let k = 0; k < APP_ROUND_SIZE; k++) problems.push(subtopic.gen(makeRng((seed + k * 7919 + 1) >>> 0)));
   }
-  return { subtopicId: subtopic.id, problems, i: 0, miss: 0, wrongOnCurrent: 0, revealed: false, done: false };
+  return { subtopicId: subtopic.id, seed: seed >>> 0, problems, i: 0, miss: 0, wrongOnCurrent: 0, revealed: false, done: false };
+}
+
+// What gets saved for an unfinished round. A problem already answered correctly or revealed
+// counts as finished, so the snapshot points at the next problem.
+function roundSnap(round, answered) {
+  const r = answered ? nextProblem(round) : round;
+  const i = r.done ? r.problems.length : r.i;
+  return { subtopicId: r.subtopicId, seed: r.seed, i, miss: r.miss, wrongOnCurrent: answered ? 0 : r.wrongOnCurrent };
+}
+
+// Rebuild a round from a snapshot; problems regenerate deterministically from the seed.
+function resumeRound(subtopic, snap) {
+  const base = newRound(subtopic, snap.seed);
+  const n = base.problems.length;
+  if (snap.i >= n) return { ...base, i: n - 1, miss: snap.miss, done: true };
+  return { ...base, i: snap.i, miss: snap.miss, wrongOnCurrent: snap.wrongOnCurrent };
 }
 
 function checkAnswer(round, grade) {
@@ -3733,11 +3796,26 @@ function app_seed() {
 // ---------- play view ----------
 
 function app_playController(sub, ch, box) {
-  let round = newRound(sub, app_seed());
+  const saved = getRound(APP.state, sub.id);
+  let round = saved ? resumeRound(sub, saved) : newRound(sub, app_seed());
+  let resumed = !!saved && !round.done && (saved.i > 0 || saved.miss > 0);
   let phase = 'answer'; // 'answer' | 'solved' | 'revealed'
   let handle = null;
   let feedback = null;
   let actions = null;
+
+  function saveProgress() {
+    APP.state = saveRound(APP.state, roundSnap(round, phase !== 'answer'));
+    persist();
+  }
+
+  function startNewRound() {
+    round = newRound(sub, app_seed());
+    phase = 'answer';
+    resumed = false;
+    saveProgress();
+    paint(true);
+  }
 
   function paintActions() {
     actions.textContent = '';
@@ -3764,6 +3842,7 @@ function app_playController(sub, ch, box) {
     showGrade(handle, grade);
     if (grade.ok) {
       phase = 'solved';
+      saveProgress();
       handle.lock(true);
       setFeedback(h('p', { class: 'fb-ok' }, svgIcon('check', 18), h('span', null, 'ถูกต้อง เก่งมาก')));
       paintActions();
@@ -3773,7 +3852,7 @@ function app_playController(sub, ch, box) {
     round = checkAnswer(round, grade);
     const codes = new Set(grade.issues.map((i) => i.code).filter(Boolean));
     for (const c of codes) APP.state = recordMistake(APP.state, c);
-    persist();
+    saveProgress();
     const msgs = grade.issues.length ? grade.issues : [{ msg: 'คำตอบยังไม่ถูกต้อง ลองตรวจอีกครั้ง' }];
     setFeedback(
       h('p', { class: 'fb-head' }, svgIcon('warn', 18), h('span', null, 'ยังไม่ถูก ลองแก้แล้วตรวจอีกครั้ง')),
@@ -3785,6 +3864,7 @@ function app_playController(sub, ch, box) {
     const p = round.problems[round.i];
     round = reveal(round);
     phase = 'revealed';
+    saveProgress();
     handle.showAnswer();
     handle.lock(true);
     setFeedback(
@@ -3797,6 +3877,8 @@ function app_playController(sub, ch, box) {
   function onNext() {
     round = nextProblem(round);
     phase = 'answer';
+    resumed = false;
+    if (!round.done) saveProgress();
     paint(true);
   }
 
@@ -3811,6 +3893,11 @@ function app_playController(sub, ch, box) {
     sumBtn.addEventListener('click', () => app_openSummary(sub, sumBtn));
     const heading = h('h2', { class: 'prob-h', id: 'prob-h', tabindex: '-1' }, 'โจทย์ ' + (round.i + 1) + '/' + round.problems.length);
     box.appendChild(h('div', { class: 'play-bar' }, heading, sumBtn));
+    if (resumed) {
+      box.appendChild(h('div', { class: 'resume-note', role: 'status' },
+        h('span', null, 'เล่นต่อจากรอบที่ค้างไว้ (คะแนนพลาดสะสม ' + round.miss + ')'),
+        h('button', { class: 'btn sm', type: 'button', id: 'btn-restart', onclick: startNewRound }, 'เริ่มรอบใหม่')));
+    }
     box.appendChild(h('section', { class: 'card problem', 'aria-labelledby': 'prob-h' },
       p.title ? h('p', { class: 'problem-title' }, p.title) : null,
       h('p', { class: 'problem-text' }, p.text)));
@@ -3832,11 +3919,12 @@ function app_playController(sub, ch, box) {
       h('div', { class: 'end-stars' }, app_starRow(stars), h('span', null, 'ได้ ' + stars + ' ดาวในรอบนี้')),
       h('p', { class: 'muted' }, 'ดาวสูงสุดของหัวข้อนี้ ', h('span', { class: 'num' }, best + '/3'), ' · คะแนนพลาดรอบนี้ ', h('span', { class: 'num' }, round.miss)),
       h('div', { class: 'play-actions' },
-        h('button', { class: 'btn primary', type: 'button', id: 'btn-again', onclick: () => { round = newRound(sub, app_seed()); phase = 'answer'; paint(true); } }, 'เล่นอีกรอบ'),
+        h('button', { class: 'btn primary', type: 'button', id: 'btn-again', onclick: startNewRound }, 'เล่นอีกรอบ'),
         app_link('#/ch/' + ch.id, 'btn', 'กลับไปบท'))));
     heading.focus();
   }
 
+  if (!saved) saveProgress();
   paint(false);
 }
 
